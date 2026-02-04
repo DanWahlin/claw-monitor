@@ -13,7 +13,10 @@ A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) su
 - **Elapsed time** — Track how long each session has been running
 - **Toggle modes** — Switch between "running only" and "all recent" views
 
-## Installation
+<img width="709" height="292" alt="No sub agents" src="https://github.com/user-attachments/assets/8104b1fd-f536-4d54-a40f-b5c775735492" />
+
+<img width="715" height="500" alt="Monitoring sub agents" src="https://github.com/user-attachments/assets/fe8f7815-7231-4090-83d0-a7b331be79b0" />
+
 
 ```bash
 git clone https://github.com/DanWahlin/claw-monitor.git
