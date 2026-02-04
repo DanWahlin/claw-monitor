@@ -20,7 +20,7 @@
     "terminal",
     "agents"
   ],
-  "author": "",
+  "author": "Dan Wahlin",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.3.0",
