@@ -2,6 +2,8 @@
 
 A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) sub-agent sessions in real-time.
 
+Disclaimer: Created by OpenClaw with my coaching in < 5 minutes. Works on my machine!
+
 ![claw-monitor demo](https://img.shields.io/badge/status-beta-yellow)
 
 ## Features
