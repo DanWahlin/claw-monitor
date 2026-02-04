@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
+import React, { useState, useEffect } from 'react';
+import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
 import { AgentCard } from './components/AgentCard.js';
 import { Footer } from './components/Footer.js';
@@ -11,6 +11,13 @@ export function App() {
   const [showAll, setShowAll] = useState(false);
   const { agents, stats, error } = useSubAgents(showAll);
   const { exit } = useApp();
+  const { write } = useStdout();
+
+  // Clear screen when toggling to handle height changes
+  useEffect(() => {
+    // ANSI escape: move to top-left and clear screen
+    write('\x1b[H\x1b[2J');
+  }, [showAll, write]);
 
   // Handle keyboard input only when TTY is available
   useInput((input, key) => {
