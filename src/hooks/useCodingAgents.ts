@@ -23,9 +23,19 @@ interface PatternMatch {
 }
 
 const PATTERNS: PatternMatch[] = [
-  { type: 'CC', pattern: /claude\s+--dangerously/ },
-  { type: 'GHCP', pattern: /gh\s+copilot/ },
-  { type: 'Codex', pattern: /codex\s+exec/ },
+  { type: 'CC', pattern: /(?:^|\/)claude\s+--dangerously/ },
+  { type: 'GHCP', pattern: /(?:^|\/)gh\s+copilot/ },
+  { type: 'Codex', pattern: /(?:^|\/)codex\s+exec/ },
+];
+
+// Patterns to exclude (wrapper processes, shells, sudo, grep, etc.)
+const EXCLUDE_PATTERNS = [
+  /^sudo\s/,
+  /\bsh\s+-c\b/,
+  /\bbash\s+-c\b/,
+  /\bgrep\b/,
+  /\bps\s+aux\b/,
+  /\btee\b/,
 ];
 
 function parsePsLine(line: string): { pid: number; elapsed: string; command: string } | null {
@@ -60,6 +70,9 @@ function detectAgents(): CodingAgent[] {
   for (const line of lines) {
     const parsed = parsePsLine(line);
     if (!parsed) continue;
+
+    // Skip wrapper/shell processes
+    if (EXCLUDE_PATTERNS.some(ep => ep.test(parsed.command))) continue;
 
     for (const { type, pattern } of PATTERNS) {
       if (pattern.test(parsed.command)) {
