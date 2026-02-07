@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
+import { useCodingAgents } from './hooks/useCodingAgents.js';
 import { AgentCard } from './components/AgentCard.js';
+import { CodingAgentCard } from './components/CodingAgentCard.js';
 import { Footer } from './components/Footer.js';
 
 // Check if we have TTY support
@@ -10,6 +12,7 @@ const isTTY = process.stdin.isTTY ?? false;
 export function App() {
   const [showAll, setShowAll] = useState(false);
   const { agents, stats, error } = useSubAgents(showAll);
+  const { agents: codingAgents, stats: codingStats } = useCodingAgents();
   const { exit } = useApp();
   const { write } = useStdout();
 
@@ -53,12 +56,47 @@ export function App() {
       </Text>
       <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
 
+      {/* Coding Agents section */}
+      {codingAgents.length > 0 && (
+        <Box flexDirection="column">
+          <Text>
+            <Text dimColor>{'│  '}</Text>
+            <Text bold color="magenta">Coding Agents</Text>
+            <Text dimColor>{' ('}</Text>
+            <Text color="magenta" bold>{String(codingStats.total)}</Text>
+            <Text dimColor>{')'}</Text>
+            <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 14 - 2 - String(codingStats.total).length - 1)) + '│'}</Text>
+          </Text>
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          {codingAgents.map((agent) => (
+            <Box key={`${agent.type}-${agent.pid}`} flexDirection="column">
+              <CodingAgentCard agent={agent} boxWidth={innerWidth} />
+              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+            </Box>
+          ))}
+          <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+        </Box>
+      )}
+
       {/* Error state */}
       {error && (
         <Text>
           <Text dimColor>{'│  '}</Text>
           <Text color="yellow">{'⚠  '}{error}</Text>
           <Text dimColor>{padLine('  ⚠  ' + error) + '│'}</Text>
+        </Text>
+      )}
+
+      {/* Sub-Agents section header */}
+      {(agents.length > 0 || (!error && agents.length === 0)) && (
+        <Text>
+          <Text dimColor>{'│  '}</Text>
+          <Text bold color="cyan">Sub-Agents</Text>
+          <Text dimColor>{' ('}</Text>
+          <Text color="cyan" bold>{String(stats.total)}</Text>
+          <Text dimColor>{')'}</Text>
+          <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 10 - 2 - String(stats.total).length - 1)) + '│'}</Text>
         </Text>
       )}
 
@@ -82,6 +120,7 @@ export function App() {
       {/* Agent list */}
       {agents.length > 0 && (
         <Box flexDirection="column">
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
           {agents.map((agent) => (
             <Box key={agent.filePath} flexDirection="column">
               <AgentCard agent={agent} boxWidth={innerWidth} />
@@ -94,7 +133,7 @@ export function App() {
       <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
 
       {/* Footer */}
-      <Footer stats={stats} />
+      <Footer stats={stats} codingAgentCount={codingStats.total} />
 
       {/* Help hint */}
       <Box marginTop={1}>
