@@ -93,7 +93,15 @@ function detectAgents(): CodingAgent[] {
     }
   }
 
-  return agents;
+  // Deduplicate: keep only lowest PID per agent type (parent process)
+  const seen = new Map<AgentType, CodingAgent>();
+  for (const agent of agents) {
+    const existing = seen.get(agent.type);
+    if (!existing || agent.pid < existing.pid) {
+      seen.set(agent.type, agent);
+    }
+  }
+  return Array.from(seen.values());
 }
 
 export function useCodingAgents() {
