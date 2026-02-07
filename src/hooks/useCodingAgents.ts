@@ -25,7 +25,7 @@ interface PatternMatch {
 const PATTERNS: PatternMatch[] = [
   { type: 'CC', pattern: /(?:^|\/)claude\s+--dangerously/ },
   { type: 'GHCP', pattern: /(?:^|\/)gh\s+copilot/ },
-  { type: 'Codex', pattern: /(?:^|\/)codex\s+exec/ },
+  { type: 'Codex', pattern: /(?:^|\/)codex[\s/]/ },
 ];
 
 // Patterns to exclude (wrapper processes, shells, sudo, grep, etc.)
@@ -36,6 +36,7 @@ const EXCLUDE_PATTERNS = [
   /\bgrep\b/,
   /\bps\s+aux\b/,
   /\btee\b/,
+  /^node\s/,
 ];
 
 function parsePsLine(line: string): { pid: number; elapsed: string; command: string } | null {
