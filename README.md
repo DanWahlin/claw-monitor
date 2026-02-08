@@ -9,11 +9,13 @@ Disclaimer: Created by OpenClaw with my coaching in < 5 minutes. Works on my mac
 ## Features
 
 - **Live monitoring** — Watch sub-agents work in real-time with 500ms refresh
+- **Coding agent detection** — Shows running Claude Code, GitHub Copilot, and Codex processes
 - **Status tracking** — See running, complete, and failed sessions at a glance
 - **Session labels** — Shows spawn labels for easy identification
 - **Tool activity** — Displays current tool being executed and total tool calls
 - **Elapsed time** — Track how long each session has been running
 - **Toggle modes** — Switch between "running only" and "all recent" views
+- **Attach commands** — Jump into any coding agent's interactive session
 
 <img width="709" height="292" alt="No sub agents" src="https://github.com/user-attachments/assets/8104b1fd-f536-4d54-a40f-b5c775735492" />
 
@@ -47,6 +49,31 @@ claw-monitor
 | `q` | Quit |
 | `a` | Toggle between running-only and all sessions |
 | `Ctrl+C` | Quit |
+
+## Coding Agent Attach Commands
+
+claw-monitor detects running coding agents (Claude Code, GitHub Copilot CLI, Codex) via process monitoring. To jump into an agent's interactive terminal session, use the attach commands included in `bin/`:
+
+### Install
+
+```bash
+# Symlink to PATH (one-time setup)
+sudo ln -sf "$(pwd)/bin/cc-attach" /usr/local/bin/cc-attach
+sudo ln -sf "$(pwd)/bin/copilot-attach" /usr/local/bin/copilot-attach
+sudo ln -sf "$(pwd)/bin/codex-attach" /usr/local/bin/codex-attach
+```
+
+### Usage
+
+| Command | Attaches to | Model |
+|---------|------------|-------|
+| `cc-attach` | Claude Code | Opus 4.6 |
+| `copilot-attach` | GitHub Copilot CLI | GPT-5 / Sonnet / Gemini |
+| `codex-attach` | Codex | GPT-5.2 |
+
+Detach from any session with `Ctrl+B` then `D` — the agent keeps running in the background.
+
+> **Note:** These commands attach to tmux sessions named `cc`, `ghcp`, and `codex`. The sessions are created by your OpenClaw agent when it launches coding tasks. If no session is running, you'll see a message telling you to start one.
 
 ## Requirements
 
