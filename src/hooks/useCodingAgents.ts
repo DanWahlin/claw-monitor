@@ -114,7 +114,7 @@ export function useCodingAgents() {
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 2000);
+    const interval = setInterval(refresh, 5000);
     return () => clearInterval(interval);
   }, [refresh]);
 
