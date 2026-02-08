@@ -146,6 +146,24 @@ export function App() {
           <Text color={showAll ? 'green' : 'yellow'}>{showAll ? 'all' : 'running only'}</Text>
         </Text>
       </Box>
+
+      {/* Attach commands */}
+      <Box marginTop={1} flexDirection="column">
+        <Text dimColor>{'Attach to coding agents:'}</Text>
+        <Text>
+          <Text color="cyan">{'  cc-attach      '}</Text>
+          <Text dimColor>{'Claude Code (Opus 4.6)'}</Text>
+        </Text>
+        <Text>
+          <Text color="cyan">{'  copilot-attach  '}</Text>
+          <Text dimColor>{'GitHub Copilot (GPT-5 / Sonnet / Gemini)'}</Text>
+        </Text>
+        <Text>
+          <Text color="cyan">{'  codex-attach    '}</Text>
+          <Text dimColor>{'Codex (GPT-5.2)'}</Text>
+        </Text>
+        <Text dimColor>{'  Detach: Ctrl+B then D'}</Text>
+      </Box>
     </Box>
   );
 }
