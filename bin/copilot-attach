@@ -1,0 +1,2 @@
+#!/bin/bash
+tmux attach -t ghcp 2>/dev/null || echo "No Copilot session running. Atlas needs to start one first."

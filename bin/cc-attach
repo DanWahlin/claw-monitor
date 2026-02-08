@@ -1,0 +1,2 @@
+#!/bin/bash
+tmux attach -t cc 2>/dev/null || echo "No CC session running. Atlas needs to start one first."

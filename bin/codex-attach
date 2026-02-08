@@ -1,0 +1,2 @@
+#!/bin/bash
+tmux attach -t codex 2>/dev/null || echo "No Codex session running. Atlas needs to start one first."
