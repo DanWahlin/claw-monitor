@@ -1,8 +1,6 @@
 # 🦞 claw-monitor
 
-A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) sub-agent sessions in real-time.
-
-Disclaimer: Created by OpenClaw with my coaching in < 5 minutes. Works on my machine!
+A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) sub-agent sessions and coding agents (Claude Code, GitHub Copilot, Codex) in real-time.
 
 ![claw-monitor demo](https://img.shields.io/badge/status-beta-yellow)
 
@@ -79,20 +77,34 @@ Detach from any session with `Ctrl+B` then `D` — the agent keeps running in th
 
 - Node.js 18+
 - OpenClaw installed and running (reads from `~/.openclaw/agents/main/sessions/`)
+- tmux (for coding agent attach/detach)
 
 ## How It Works
 
-claw-monitor watches OpenClaw's session directory and `sessions.json` metadata file to:
+### Sub-Agent Monitoring
+Watches OpenClaw's session directory (`~/.openclaw/agents/main/sessions/`) and `sessions.json` metadata file to:
 
 1. Identify sub-agent sessions (filters out main session)
 2. Parse JSONL session logs for tool usage and timing
 3. Use OpenClaw's `updatedAt` timestamps for accurate activity detection
 4. Display session labels assigned during `sessions_spawn`
 
+### Coding Agent Detection
+Polls `ps aux` every 2 seconds to detect running coding agent processes:
+
+| Agent | Process pattern | Icon |
+|-------|----------------|------|
+| Claude Code | `claude --dangerously` | 🤖 |
+| GitHub Copilot CLI | `gh copilot` | 🐙 |
+| Codex | `codex` (Rust binary) | 📦 |
+
+Filters out wrapper processes (sudo, bash, node shims) and deduplicates to show one entry per agent type. Agents run in named tmux sessions (`cc`, `ghcp`, `codex`) for easy attach/detach.
+
 ## Built With
 
 - [ink](https://github.com/vadimdemedes/ink) — React for CLI apps
 - [chokidar](https://github.com/paulmillr/chokidar) — File watching
+- [tmux](https://github.com/tmux/tmux) — Terminal multiplexing for coding agent sessions
 
 ## License
 
