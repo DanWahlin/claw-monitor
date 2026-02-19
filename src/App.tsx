@@ -3,9 +3,11 @@ import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
 import { useCodingAgents } from './hooks/useCodingAgents.js';
 import { useCronJobs } from './hooks/useCronJobs.js';
+import { useSysStats } from './hooks/useSysStats.js';
 import { AgentCard } from './components/AgentCard.js';
 import { CodingAgentCard } from './components/CodingAgentCard.js';
 import { CronSection } from './components/CronSection.js';
+import { SysStatsSection } from './components/SysStats.js';
 import { Footer } from './components/Footer.js';
 
 // Check if we have TTY support
@@ -16,6 +18,7 @@ export function App() {
   const { agents, stats, error } = useSubAgents(showAll);
   const { agents: codingAgents, stats: codingStats } = useCodingAgents();
   const { jobs: cronJobs, stats: cronStats } = useCronJobs();
+  const sysStats = useSysStats();
   const { exit } = useApp();
   const { write } = useStdout();
 
@@ -144,6 +147,9 @@ export function App() {
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
+
+      {/* System Stats */}
+      <SysStatsSection stats={sysStats} boxWidth={innerWidth} />
 
       {/* Footer */}
       <Footer stats={stats} codingAgentCount={codingStats.total} />
