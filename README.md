@@ -1,12 +1,12 @@
 # 🦞 claw-monitor
 
-A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) sub-agent sessions and coding agents (Claude Code, GitHub Copilot, Codex) in real-time.
+A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) sub-agent sessions and coding agents (Claude Code, GitHub Copilot, Codex), a team of agents (and other cron jobs), and CPU/memory/disk in real-time.
 
 ![claw-monitor demo](https://img.shields.io/badge/status-beta-yellow)
 
 ## Features
 
-- **Live monitoring** — Watch sub-agents work in real-time with 500ms refresh
+- **Live monitoring** — Watch sub-agents work in real-time and even connect to them. Stay on top of cron jobs.
 - **Coding agent detection** — Shows running Claude Code, GitHub Copilot, and Codex processes
 - **Status tracking** — See running, complete, and failed sessions at a glance
 - **Session labels** — Shows spawn labels for easy identification
