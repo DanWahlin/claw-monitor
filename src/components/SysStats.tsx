@@ -60,7 +60,9 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
     <Box flexDirection="column">
       <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {renderBar('CPU ', stats.cpu.percent, cpuDetail, barWidth, boxWidth)}
+      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {renderBar('MEM ', stats.mem.percent, memDetail, barWidth, boxWidth)}
+      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {renderBar('DISK', stats.disk.percent, diskDetail, barWidth, boxWidth)}
     </Box>
   );
