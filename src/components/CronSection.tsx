@@ -33,9 +33,9 @@ function fit(text: string, width: number): string {
 export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
   // Column widths
   const nameW = 24;
-  const schedW = 16;
-  const nextW = 10;
-  const durW = 7;
+  const schedW = 22;
+  const nextW = 12;
+  const durW = 10;
   // Remaining space for right padding
 
   return (

@@ -38,8 +38,8 @@ export function App() {
     }
   }, { isActive: isTTY });
 
-  const boxWidth = 64;
-  const innerWidth = boxWidth - 2; // 62 chars between borders
+  const boxWidth = 78;
+  const innerWidth = boxWidth - 2; // 76 chars between borders
   const horizontalLine = '─'.repeat(innerWidth);
 
   // Helper to pad content to fill the box

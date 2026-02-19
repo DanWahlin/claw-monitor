@@ -12,7 +12,7 @@ interface FooterProps {
 }
 
 export function Footer({ stats, codingAgentCount = 0 }: FooterProps) {
-  const boxWidth = 64;
+  const boxWidth = 78;
   const innerWidth = boxWidth - 2;
 
   // Build stats string to calculate padding
