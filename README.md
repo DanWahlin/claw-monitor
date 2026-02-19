@@ -15,9 +15,11 @@ A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) su
 - **Toggle modes** — Switch between "running only" and "all recent" views
 - **Attach commands** — Jump into any coding agent's interactive session
 
-<img width="709" height="292" alt="No sub agents" src="https://github.com/user-attachments/assets/8104b1fd-f536-4d54-a40f-b5c775735492" />
+<img width="709" height="292" alt="No sub agents" src="images/no-sub-agents.png" />
 
-<img width="715" height="500" alt="Monitoring sub agents" src="https://github.com/user-attachments/assets/fe8f7815-7231-4090-83d0-a7b331be79b0" />
+<img width="715" height="500" alt="Monitoring sub agents" src="images/monitoring-sub-agents.png" />
+
+<img width="709" alt="Cron jobs monitoring" src="images/cron-jobs.jpg" />
 
 
 ```bash
