@@ -9,12 +9,18 @@ interface CronSectionProps {
   boxWidth: number;
 }
 
+// All icons must be exactly 2 visual columns / 1 JS char for consistent alignment
 function statusIcon(job: CronJob): string {
   if (job.isRunning) return '⏳';
   if (job.consecutiveErrors > 0) return '❌';
   if (job.lastStatus === 'ok') return '✅';
-  if (job.lastStatus === 'none') return '⬚ ';
-  return '⬚ ';
+  return '⚬';  // 'none' status — single-width, padded below
+}
+
+// Returns 1 if icon is wide emoji (2 visual cols, 1 JS char), 0 otherwise
+function iconWidthOffset(job: CronJob): number {
+  if (job.isRunning || job.consecutiveErrors > 0 || job.lastStatus === 'ok') return 1;
+  return 0; // ⚬ is single-width
 }
 
 function statusColor(job: CronJob): string {
@@ -91,8 +97,10 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
         const nextText = fit(job.nextRun, nextW);
         const durDisplay = fit(durText, durW + errSuffix.length);
 
-        const contentLen = 2 + 2 + 1 + nameText.length + schedText.length + nextText.length + durDisplay.length;
-        const rowPad = Math.max(1, boxWidth - contentLen);
+        // Wide emoji: 1 JS char but 2 visual columns. Offset adjusts padding.
+        const offset = iconWidthOffset(job);
+        const contentLen = 2 + 1 + 1 + nameText.length + schedText.length + nextText.length + durDisplay.length;
+        const rowPad = Math.max(1, boxWidth - contentLen - offset);
 
         return (
           <Text key={job.id}>

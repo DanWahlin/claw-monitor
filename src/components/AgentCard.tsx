@@ -64,11 +64,11 @@ export function AgentCard({ agent, boxWidth }: AgentCardProps) {
   const detailText = getDetailText();
 
   // Calculate widths carefully
-  // Line 1: │ + emoji(2) + space + label + 2spaces + [spinner(1) + space if running] + status + 2spaces + elapsed + padding + │
-  // Emoji counts as 2 visual columns
+  // Line 1: │(1) + emoji(2 visual, 1 JS) + space(1) + label + 2spaces + [spinner+space if running] + status + 2spaces + elapsed + padding + │
+  const emojiOffset = 1; // emoji is 2 visual cols but 1 JS char
   const spinnerWidth = status === 'running' ? 2 : 0; // spinner + space
-  const line1ContentWidth = 2 + 1 + displayLabel.length + 2 + spinnerWidth + statusText.length + 2 + elapsedStr.length;
-  const line1Padding = Math.max(1, boxWidth - line1ContentWidth);
+  const line1ContentWidth = 1 + 1 + 1 + displayLabel.length + 2 + spinnerWidth + statusText.length + 2 + elapsedStr.length;
+  const line1Padding = Math.max(1, boxWidth - line1ContentWidth - emojiOffset);
 
   // Line 2: │ + 3spaces + └─ + space + detail + padding + │
   const line2ContentWidth = 6 + detailText.length;

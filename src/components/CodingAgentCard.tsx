@@ -30,9 +30,10 @@ export function CodingAgentCard({ agent, boxWidth }: CodingAgentCardProps) {
   const pidStr = `PID ${agent.pid}`;
 
   // Line 1: │ icon(2) space label  spinner(1+1) pidStr  elapsed padding │
+  const emojiOffset = 1; // icon emoji is 2 visual cols but 1 JS char
   const spinnerWidth = 2; // spinner char + space
-  const line1ContentWidth = 2 + 1 + label.length + 2 + spinnerWidth + pidStr.length + 2 + agent.elapsed.length;
-  const line1Padding = Math.max(1, boxWidth - line1ContentWidth);
+  const line1ContentWidth = 1 + 1 + 1 + label.length + 2 + spinnerWidth + pidStr.length + 2 + agent.elapsed.length;
+  const line1Padding = Math.max(1, boxWidth - line1ContentWidth - emojiOffset);
 
   // Line 2: │   └─ command padding │
   const line2ContentWidth = 6 + agent.command.length;
