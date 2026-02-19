@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
 import { useCodingAgents } from './hooks/useCodingAgents.js';
+import { useCronJobs } from './hooks/useCronJobs.js';
 import { AgentCard } from './components/AgentCard.js';
 import { CodingAgentCard } from './components/CodingAgentCard.js';
+import { CronSection } from './components/CronSection.js';
 import { Footer } from './components/Footer.js';
 
 // Check if we have TTY support
@@ -13,6 +15,7 @@ export function App() {
   const [showAll, setShowAll] = useState(false);
   const { agents, stats, error } = useSubAgents(showAll);
   const { agents: codingAgents, stats: codingStats } = useCodingAgents();
+  const { jobs: cronJobs, stats: cronStats } = useCronJobs();
   const { exit } = useApp();
   const { write } = useStdout();
 
@@ -131,6 +134,16 @@ export function App() {
       )}
 
       <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+
+      {/* Cron Jobs section */}
+      {cronJobs.length > 0 && (
+        <Box flexDirection="column">
+          <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+        </Box>
+      )}
 
       {/* Footer */}
       <Footer stats={stats} codingAgentCount={codingStats.total} />
