@@ -80,7 +80,6 @@ export function App() {
         <Text bold> claw-monitor </Text>
         <Text dimColor>{'─'.repeat(innerWidth - 18)}{'┐'}</Text>
       </Text>
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
 
       {/* Coding Agents section */}
       {codingAgents.length > 0 && (
@@ -93,15 +92,12 @@ export function App() {
             <Text dimColor>{')'}</Text>
             <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 14 - 2 - String(codingStats.total).length - 1)) + '│'}</Text>
           </Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
           {codingAgents.map((agent) => (
             <Box key={`${agent.type}-${agent.pid}`} flexDirection="column">
               <CodingAgentCard agent={agent} boxWidth={innerWidth} />
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
             </Box>
           ))}
           <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
 
@@ -144,7 +140,6 @@ export function App() {
       )}
 
       {/* Attach commands (inside Sub-Agents section) */}
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
       {(() => {
         const attachLine = 'cc-attach: Claude Code │ codex-attach: Codex │ copilot-attach: Copilot CLI';
         const aPad = Math.max(0, innerWidth - attachLine.length - 2);
@@ -174,7 +169,6 @@ export function App() {
       {/* Agent list */}
       {agents.length > 0 && (
         <Box flexDirection="column">
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
           {agents.map((agent, idx) => (
             <Box key={agent.filePath} flexDirection="column">
               <AgentCard
@@ -183,19 +177,15 @@ export function App() {
                 isSelected={idx === selectedIdx}
                 isExpanded={idx === expandedIdx}
               />
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
             </Box>
           ))}
         </Box>
       )}
 
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
-
       {/* Cron Jobs section */}
       {(cronJobs.length > 0 || cronWarning) && (
         <Box flexDirection="column">
           <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
           {cronJobs.length > 0 && (
             <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
           )}
@@ -206,7 +196,6 @@ export function App() {
               <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - cronWarning.length)) + '│'}</Text>
             </Text>
           )}
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
 
@@ -214,10 +203,7 @@ export function App() {
       {(systemCronJobs.length > 0 || sysCronWarning) && (
         <Box flexDirection="column">
           {cronJobs.length === 0 && !cronWarning && (
-            <>
-              <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
-            </>
+            <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
           )}
           {systemCronJobs.length > 0 && (
             <SystemCronSection jobs={systemCronJobs} stats={systemCronStats} boxWidth={innerWidth} />
@@ -229,7 +215,6 @@ export function App() {
               <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - sysCronWarning.length)) + '│'}</Text>
             </Text>
           )}
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
 
@@ -240,7 +225,7 @@ export function App() {
       <Footer stats={stats} codingAgentCount={codingStats.total} boxWidth={boxWidth} />
 
       {/* Help hint */}
-      <Box marginTop={1}>
+      <Box marginTop={0}>
         <Text>
           <Text dimColor>{'Press '}</Text>
           <Text color="cyan">{'q'}</Text>
@@ -257,6 +242,11 @@ export function App() {
               <Text dimColor>{' expand'}</Text>
             </>
           )}
+          <Text dimColor>{' | '}</Text>
+          <Text color="cyan">{process.platform === 'darwin' ? '⌘' : 'Ctrl'}</Text>
+          <Text dimColor>{'+'}</Text>
+          <Text color="cyan">{'-/+'}</Text>
+          <Text dimColor>{' zoom'}</Text>
         </Text>
       </Box>
     </Box>

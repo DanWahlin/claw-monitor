@@ -15,6 +15,7 @@ export interface DockerContainer {
   name: string;
   image: string;
   status: string;
+  source: 'docker' | 'k8s';
 }
 
 export interface DockerInfo {
@@ -35,6 +36,7 @@ export interface SysStats {
 // Detect tool availability once at startup
 let hasNvidiaSmi: boolean | null = null;
 let hasDocker: boolean | null = null;
+let hasKubectl: boolean | null = null;
 
 function commandExists(cmd: string): boolean {
   try {
@@ -125,7 +127,7 @@ function getDockerStats(warnings: string[]): DockerInfo {
       .filter(l => l.length > 0)
       .map(line => {
         const [name, image, ...statusParts] = line.split('\t');
-        return { name: name || '?', image: image || '?', status: statusParts.join(' ') || '?' };
+        return { name: name || '?', image: image || '?', status: statusParts.join(' ') || '?', source: 'docker' as const };
       });
     return { running: containers.length, containers, available: true };
   } catch {
@@ -134,14 +136,85 @@ function getDockerStats(warnings: string[]): DockerInfo {
   }
 }
 
+import * as fs from 'fs';
+
+// System namespaces to exclude from k8s pod listing
+const K8S_SYSTEM_NS = new Set([
+  'kube-system', 'kube-public', 'kube-node-lease',
+  'cattle-system', 'fleet-system', 'cattle-fleet-system',
+]);
+
+const K3S_KUBECONFIG = '/etc/rancher/k3s/k3s.yaml';
+
+// Detect k3s vs generic k8s at startup
+let k8sLabel: 'k3s' | 'k8s' = 'k8s';
+let k8sKubectlPrefix: string = 'kubectl';
+
+function initK8sConfig(): void {
+  if (hasKubectl === null) hasKubectl = commandExists('kubectl');
+  if (!hasKubectl) return;
+
+  // If k3s kubeconfig exists, use it with the default context
+  try {
+    if (fs.existsSync(K3S_KUBECONFIG)) {
+      k8sLabel = 'k3s';
+      k8sKubectlPrefix = `kubectl --kubeconfig ${K3S_KUBECONFIG} --context default`;
+    }
+  } catch {
+    // fall through to default kubectl
+  }
+}
+
+function getK8sPods(warnings: string[]): DockerContainer[] {
+  if (hasKubectl === null) {
+    initK8sConfig();
+  }
+  if (!hasKubectl) return [];
+
+  try {
+    const output = execSync(
+      `${k8sKubectlPrefix} get pods --all-namespaces --no-headers ` +
+      "-o custom-columns='NS:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase,IMAGE:.spec.containers[0].image' 2>/dev/null",
+      { encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    return output.trim().split('\n')
+      .filter(l => l.length > 0)
+      .map(line => {
+        const parts = line.trim().split(/\s{2,}/);
+        const ns = parts[0] || '';
+        const name = parts[1] || '?';
+        const status = parts[2] || '?';
+        const image = parts[3] || '?';
+        return { ns, name, image, status };
+      })
+      .filter(p => !K8S_SYSTEM_NS.has(p.ns))
+      .map(p => ({
+        name: `${p.name} (${k8sLabel})`,
+        image: p.image,
+        status: p.status,
+        source: 'k8s' as const,
+      }));
+  } catch {
+    // kubectl not connected or cluster unreachable — silently skip
+    return [];
+  }
+}
+
 function collectStats(): SysStats {
   const warnings: string[] = [];
+  const docker = getDockerStats(warnings);
+  const k8sPods = getK8sPods(warnings);
+  if (k8sPods.length > 0) {
+    docker.containers = [...docker.containers, ...k8sPods];
+    docker.running = docker.containers.length;
+    docker.available = true;
+  }
   return {
     cpu: { percent: getCpuPercent(warnings), cores: os.cpus().length },
     mem: getMemStats(),
     disk: getDiskStats(warnings),
     gpu: getGpuStats(warnings),
-    docker: getDockerStats(warnings),
+    docker,
     warnings,
   };
 }

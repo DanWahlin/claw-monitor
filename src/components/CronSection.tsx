@@ -67,7 +67,6 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
         )}
         <Text dimColor>{' '.repeat(titlePad) + '│'}</Text>
       </Text>
-      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
 
       {/* Column headers */}
       <Text>

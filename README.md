@@ -31,8 +31,9 @@ A terminal dashboard for monitoring [OpenClaw](https://github.com/openclaw/openc
 ### System Resources & Docker
 - **CPU / Memory / Disk** — Color-coded bar charts with usage percentages and details
 - **GPU monitoring** — NVIDIA GPU usage via `nvidia-smi` (auto-detected)
-- **Docker containers** — Shows running container names, images, and status
-- **Two-column layout** — Resource gauges on the left, Docker info on the right
+- **Docker containers** — Shows running container names and status
+- **Kubernetes pods** — Shows k8s/k3s pods (auto-detected, system namespaces filtered)
+- **Two-column layout** — Resource gauges on the left, containers/pods on the right
 - **Color thresholds** — Green (healthy), yellow (≥70%), red (≥90%) — configurable via env vars
 
 ### Responsive Layout
@@ -75,6 +76,7 @@ claw-monitor
 | `a` | Toggle between running-only and all sessions |
 | `↑` `↓` | Select agent (when agents are running) |
 | `Enter` | Expand/collapse agent details |
+| `Cmd+-/+` or `Ctrl+-/+` | Zoom terminal font size |
 | `Ctrl+C` | Quit |
 
 ## Coding Agent Attach Commands
@@ -134,6 +136,7 @@ POLL_STATS=5000 WARN_THRESHOLD=60 claw-monitor
 Optional (auto-detected):
 - `nvidia-smi` — for GPU monitoring
 - Docker — for container monitoring
+- `kubectl` — for Kubernetes/k3s pod monitoring
 
 ## How It Works
 
@@ -163,6 +166,7 @@ Both parse cron expressions into human-readable schedules, calculate relative ne
 - **Disk** — Parsed from `df -BG /`
 - **GPU** — Parsed from `nvidia-smi --query-gpu` (when available)
 - **Docker** — Parsed from `docker ps --format` (when available)
+- **Kubernetes** — Parsed from `kubectl get pods` (when available); auto-detects k3s via `/etc/rancher/k3s/k3s.yaml`
 
 ## Built With
 

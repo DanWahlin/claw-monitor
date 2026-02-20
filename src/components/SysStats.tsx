@@ -9,6 +9,12 @@ interface SysStatsProps {
   boxWidth: number;
 }
 
+/** Extract the k3s/k8s label from a container name like "pod-name (k3s)" */
+function k8sLabelFromName(name: string): string {
+  const m = name.match(/\((k[38]s)\)$/);
+  return m ? m[1] : 'k8s';
+}
+
 function barColor(percent: number): string {
   if (percent >= CRIT_THRESHOLD) return 'red';
   if (percent >= WARN_THRESHOLD) return 'yellow';
@@ -82,10 +88,9 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
     leftRows.push({ label: 'GPU ', percent: stats.gpu.percent, detail: gpuDetail });
   }
 
-  // Build right-column rows (docker containers)
+  // Build right-column rows (docker/k8s containers)
   const hasDocker = stats.docker.available && stats.docker.running > 0;
-  const nameW = Math.max(8, Math.floor(rightW * 0.35));
-  const imageW = Math.max(8, Math.floor(rightW * 0.40));
+  const nameW = Math.max(8, Math.floor(rightW * 0.55));
 
   const dockerHdr = hasDocker
     ? `${stats.docker.running} container${stats.docker.running !== 1 ? 's' : ''}`
@@ -131,17 +136,21 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
     }
     const c = stats.docker.containers[rIdx - 1];
     if (!c) return <Text>{' '.repeat(rightW)}</Text>;
-    const cName = fit(c.name, nameW);
-    const cImg = fit(c.image, imageW);
-    const statusMax = Math.max(1, rightW - nameW - imageW - 2);
+    // Ensure (k3s)/(k8s) suffix is always visible after the name
+    const suffix = c.source === 'k8s' ? ` (${k8sLabelFromName(c.name)})` : '';
+    const baseName = suffix ? c.name.replace(/\s*\(k[38]s\)$/, '') : c.name;
+    const nameAvail = nameW - suffix.length;
+    const cName = nameAvail > 3
+      ? fit(baseName, nameAvail) + suffix
+      : fit(c.name, nameW);
+    const paddedName = cName.padEnd(nameW);
+    const statusMax = Math.max(1, rightW - nameW - 1);
     const cStatus = c.status.length > statusMax ? c.status.substring(0, statusMax - 1) + '~' : c.status;
-    const rowStr = `${cName} ${cImg} ${cStatus}`;
+    const rowStr = `${paddedName} ${cStatus}`;
     const rPad = Math.max(0, rightW - rowStr.length);
     return (
       <>
-        <Text>{cName}</Text>
-        <Text>{' '}</Text>
-        <Text dimColor>{cImg}</Text>
+        <Text>{paddedName}</Text>
         <Text>{' '}</Text>
         <Text dimColor>{cStatus}</Text>
         <Text>{' '.repeat(rPad)}</Text>
@@ -151,7 +160,6 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
 
   return (
     <Box flexDirection="column">
-      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {displayRows.map((row, i) => (
         <Text key={i}>
           <Text dimColor>{'│  '}</Text>
