@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { execSync } from 'child_process';
 
 export type AgentType = 'CC' | 'GHCP' | 'Codex';
@@ -111,9 +111,15 @@ function detectAgents(): CodingAgent[] {
 
 export function useCodingAgents() {
   const [agents, setAgents] = useState<CodingAgent[]>([]);
+  const prevKeyRef = useRef('');
 
   const refresh = useCallback(() => {
-    setAgents(detectAgents());
+    const next = detectAgents();
+    // Only update state when the agent list actually changed (avoids re-render flicker)
+    const key = next.map(a => `${a.type}:${a.pid}`).join(',');
+    if (key === prevKeyRef.current) return;
+    prevKeyRef.current = key;
+    setAgents(next);
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { CronJob, CronStats } from '../hooks/useCronJobs.js';
+import { fit } from '../utils/cronUtils.js';
 
 interface CronSectionProps {
   jobs: CronJob[];
@@ -21,12 +22,6 @@ function statusColor(job: CronJob): string {
   if (job.consecutiveErrors > 0) return 'red';
   if (job.lastStatus === 'ok') return 'green';
   return 'gray';
-}
-
-// Truncate or pad a string to exact width
-function fit(text: string, width: number): string {
-  if (text.length > width) return text.substring(0, width - 1) + '~';
-  return text.padEnd(width);
 }
 
 export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {

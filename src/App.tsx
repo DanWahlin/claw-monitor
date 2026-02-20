@@ -3,10 +3,12 @@ import { Box, Text, useApp, useInput, useStdout } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
 import { useCodingAgents } from './hooks/useCodingAgents.js';
 import { useCronJobs } from './hooks/useCronJobs.js';
+import { useSystemCron } from './hooks/useSystemCron.js';
 import { useSysStats } from './hooks/useSysStats.js';
 import { AgentCard } from './components/AgentCard.js';
 import { CodingAgentCard } from './components/CodingAgentCard.js';
 import { CronSection } from './components/CronSection.js';
+import { SystemCronSection } from './components/SystemCronSection.js';
 import { SysStatsSection } from './components/SysStats.js';
 import { Footer } from './components/Footer.js';
 
@@ -18,6 +20,7 @@ export function App() {
   const { agents, stats, error } = useSubAgents(showAll);
   const { agents: codingAgents, stats: codingStats } = useCodingAgents();
   const { jobs: cronJobs, stats: cronStats } = useCronJobs();
+  const { jobs: systemCronJobs, stats: systemCronStats } = useSystemCron();
   const sysStats = useSysStats();
   const { exit } = useApp();
   const { write } = useStdout();
@@ -144,6 +147,20 @@ export function App() {
           <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
           <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
+          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+        </Box>
+      )}
+
+      {/* System Cron section */}
+      {systemCronJobs.length > 0 && (
+        <Box flexDirection="column">
+          {cronJobs.length === 0 && (
+            <>
+              <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
+              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+            </>
+          )}
+          <SystemCronSection jobs={systemCronJobs} stats={systemCronStats} boxWidth={innerWidth} />
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}

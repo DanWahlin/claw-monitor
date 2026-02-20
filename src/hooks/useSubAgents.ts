@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -64,6 +64,7 @@ function loadSessionsData(): SessionsData {
 export function useSubAgents(showAll: boolean = false) {
   const [agents, setAgents] = useState<SessionData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const prevKeyRef = useRef('');
 
   const loadSessions = useCallback(() => {
     try {
@@ -118,7 +119,12 @@ export function useSubAgents(showAll: boolean = false) {
         sessions = sessions.slice(0, MAX_SESSIONS);
       }
 
-      setAgents(sessions);
+      // Only update state when agent list actually changed (avoids re-render flicker)
+      const key = sessions.map(s => `${s.filePath}:${s.status}`).join(',');
+      if (key !== prevKeyRef.current) {
+        prevKeyRef.current = key;
+        setAgents(sessions);
+      }
       setError(null);
     } catch (err) {
       setError(`Error loading sessions: ${err}`);
