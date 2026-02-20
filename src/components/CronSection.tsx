@@ -31,13 +31,14 @@ function fit(text: string, width: number): string {
 
 export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
   // Column widths: indicator(1) + space(1) + name + space(1) + sched + next + dur
-  const nameW = 22;
-  const schedW = 20;
-  const nextW = 12;
-  const durW = 10;
+  const nameW = 18;
+  const schedW = 18;
+  const modelW = 18;
+  const nextW = 10;
+  const durW = 8;
 
   // Build header line as plain string, pad to boxWidth
-  const headerText = '  ' + fit('Name', nameW) + ' ' + fit('Schedule', schedW) + fit('Next', nextW) + fit('Last', durW);
+  const headerText = '  ' + fit('Name', nameW) + ' ' + fit('Schedule', schedW) + fit('Model', modelW) + fit('Next', nextW) + fit('Last', durW);
   const headerPad = Math.max(0, boxWidth - headerText.length);
 
   // Section header
@@ -86,7 +87,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
         const durText = job.lastStatus === 'error' ? 'err' + errSuffix : job.lastDuration;
 
         // Build the full row as a plain string so padding is exact
-        const rowText = ' ' + ch + ' ' + fit(job.name, nameW) + ' ' + fit(job.schedule, schedW) + fit(job.nextRun, nextW) + fit(durText, durW);
+        const rowText = ' ' + ch + ' ' + fit(job.name, nameW) + ' ' + fit(job.schedule, schedW) + fit(job.model, modelW) + fit(job.nextRun, nextW) + fit(durText, durW);
         const rowPad = Math.max(0, boxWidth - rowText.length);
 
         return (
@@ -104,6 +105,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
             )}
             <Text>{' '}</Text>
             <Text dimColor>{fit(job.schedule, schedW)}</Text>
+            <Text dimColor>{fit(job.model, modelW)}</Text>
             <Text dimColor>{fit(job.nextRun, nextW)}</Text>
             <Text color={job.consecutiveErrors > 0 ? 'red' : 'gray'}>{fit(durText, durW)}</Text>
             <Text dimColor>{' '.repeat(rowPad) + '│'}</Text>

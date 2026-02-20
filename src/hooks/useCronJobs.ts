@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 export interface CronJob {
   id: string;
   name: string;
+  model: string;
   enabled: boolean;
   schedule: string;      // human-readable
   nextRun: string;       // relative time
@@ -106,9 +107,11 @@ function loadCronJobs(): CronJob[] {
       .filter(j => j.enabled !== false)
       .map(j => {
         const state = j.state || {};
+        const rawModel = j.payload?.model || j.model || '—';
         return {
           id: j.id,
           name: j.name || j.id.substring(0, 8),
+          model: rawModel.includes('/') ? (rawModel.split('/').pop() || rawModel) : rawModel,
           enabled: j.enabled !== false,
           schedule: humanSchedule(j.schedule),
           nextRun: state.nextRunAtMs ? relativeTime(state.nextRunAtMs) : '—',
