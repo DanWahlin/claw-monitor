@@ -36,7 +36,7 @@ A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) ag
 
 <img width="715" height="500" alt="Monitoring sub agents" src="images/monitoring-sub-agents.png" />
 
-<img width="709" alt="Cron jobs and system stats" src="images/cron-jobs.jpg" />
+<img width="709" alt="Cron jobs and system stats" src="images/cron-jobs-and-stats.png" />
 
 ## Install
 
