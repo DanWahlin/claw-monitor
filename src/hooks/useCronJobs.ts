@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { execSync } from 'child_process';
 import { cronToHuman, relativeTime, formatDuration } from '../utils/cronUtils.js';
+import { POLL_CRON } from '../utils/config.js';
 
 export interface CronJob {
   id: string;
@@ -46,7 +47,7 @@ function humanSchedule(sched: any): string {
 }
 
 
-function loadCronJobs(): CronJob[] {
+function loadCronJobs(): { jobs: CronJob[]; warning: string | null } {
   let output: string;
   try {
     output = execSync('openclaw cron list --json 2>/dev/null', {
@@ -55,48 +56,54 @@ function loadCronJobs(): CronJob[] {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
   } catch {
-    return [];
+    return { jobs: [], warning: 'openclaw cron list failed' };
   }
 
   try {
     const data = JSON.parse(output);
     const jobs: any[] = data.jobs || [];
 
-    return jobs
-      .filter(j => j.enabled !== false)
-      .map(j => {
-        const state = j.state || {};
-        const rawModel = j.payload?.model || j.model || '—';
-        return {
-          id: j.id,
-          name: j.name || j.id.substring(0, 8),
-          model: rawModel.includes('/') ? (rawModel.split('/').pop() || rawModel) : rawModel,
-          enabled: j.enabled !== false,
-          schedule: humanSchedule(j.schedule),
-          nextRun: state.nextRunAtMs ? relativeTime(state.nextRunAtMs) : '—',
-          nextRunMs: state.nextRunAtMs || 0,
-          lastStatus: state.lastStatus || 'none',
-          lastDuration: state.lastDurationMs ? formatDuration(state.lastDurationMs) : '—',
-          consecutiveErrors: state.consecutiveErrors || 0,
-          isRunning: !!state.runningAtMs,
-        };
-      })
-      .sort((a, b) => a.nextRunMs - b.nextRunMs);
+    return {
+      warning: null,
+      jobs: jobs
+        .filter(j => j.enabled !== false)
+        .map(j => {
+          const state = j.state || {};
+          const rawModel = j.payload?.model || j.model || '—';
+          return {
+            id: j.id,
+            name: j.name || j.id.substring(0, 8),
+            model: rawModel.includes('/') ? (rawModel.split('/').pop() || rawModel) : rawModel,
+            enabled: j.enabled !== false,
+            schedule: humanSchedule(j.schedule),
+            nextRun: state.nextRunAtMs ? relativeTime(state.nextRunAtMs) : '—',
+            nextRunMs: state.nextRunAtMs || 0,
+            lastStatus: state.lastStatus || 'none',
+            lastDuration: state.lastDurationMs ? formatDuration(state.lastDurationMs) : '—',
+            consecutiveErrors: state.consecutiveErrors || 0,
+            isRunning: !!state.runningAtMs,
+          };
+        })
+        .sort((a, b) => a.nextRunMs - b.nextRunMs),
+    };
   } catch {
-    return [];
+    return { jobs: [], warning: 'Failed to parse cron job data' };
   }
 }
 
 export function useCronJobs() {
   const [jobs, setJobs] = useState<CronJob[]>([]);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
-    setJobs(loadCronJobs());
+    const result = loadCronJobs();
+    setJobs(result.jobs);
+    setWarning(result.warning);
   }, []);
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 15000);
+    const interval = setInterval(refresh, POLL_CRON);
     return () => clearInterval(interval);
   }, [refresh]);
 
@@ -107,5 +114,5 @@ export function useCronJobs() {
     running: jobs.filter(j => j.isRunning).length,
   };
 
-  return { jobs, stats };
+  return { jobs, stats, warning };
 }

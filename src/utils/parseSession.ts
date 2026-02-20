@@ -13,6 +13,8 @@ export interface SessionData {
   currentTool: string | null;
   toolArgs: string | null;
   toolCount: number;
+  recentTools: string[];
+  errorDetails: string | null;
   filePath: string;
   startTime: number;
 }
@@ -136,6 +138,8 @@ export function parseSession(filePath: string): SessionData | null {
     let lastTool: ToolCall | null = null;
     let startTime: number | null = null;
     let hasError = false;
+    let errorDetails: string | null = null;
+    const recentToolNames: string[] = [];
 
     for (const line of lines) {
       try {
@@ -159,11 +163,7 @@ export function parseSession(filePath: string): SessionData | null {
         if (tool) {
           toolCount++;
           lastTool = tool;
-        }
-
-        // Also count toolCall type lines directly
-        if (parsed.type === 'toolCall') {
-          // Already counted above if it has name
+          recentToolNames.push(tool.name);
         }
 
         // Check for errors in tool results
@@ -173,6 +173,8 @@ export function parseSession(filePath: string): SessionData | null {
             for (const item of content) {
               if (item.text && item.text.toLowerCase().includes('"error"')) {
                 hasError = true;
+                const snippet = item.text.substring(0, 80);
+                errorDetails = snippet.length < item.text.length ? snippet + '...' : snippet;
               }
             }
           }
@@ -210,6 +212,8 @@ export function parseSession(filePath: string): SessionData | null {
       currentTool: lastTool?.name || null,
       toolArgs: lastTool ? formatToolArgs(lastTool.arguments) : null,
       toolCount,
+      recentTools: recentToolNames.slice(-5),
+      errorDetails,
       filePath,
       startTime
     };

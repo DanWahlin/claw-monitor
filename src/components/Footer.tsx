@@ -9,10 +9,10 @@ interface FooterProps {
     failed: number;
   };
   codingAgentCount?: number;
+  boxWidth: number;
 }
 
-export function Footer({ stats, codingAgentCount = 0 }: FooterProps) {
-  const boxWidth = 78;
+export function Footer({ stats, codingAgentCount = 0, boxWidth }: FooterProps) {
   const innerWidth = boxWidth - 2;
 
   // Build stats string to calculate padding

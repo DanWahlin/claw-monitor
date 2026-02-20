@@ -5,6 +5,7 @@ import { useCodingAgents } from './hooks/useCodingAgents.js';
 import { useCronJobs } from './hooks/useCronJobs.js';
 import { useSystemCron } from './hooks/useSystemCron.js';
 import { useSysStats } from './hooks/useSysStats.js';
+import { useTerminalSize } from './hooks/useTerminalSize.js';
 import { AgentCard } from './components/AgentCard.js';
 import { CodingAgentCard } from './components/CodingAgentCard.js';
 import { CronSection } from './components/CronSection.js';
@@ -17,19 +18,31 @@ const isTTY = process.stdin.isTTY ?? false;
 
 export function App() {
   const [showAll, setShowAll] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const { agents, stats, error } = useSubAgents(showAll);
   const { agents: codingAgents, stats: codingStats } = useCodingAgents();
-  const { jobs: cronJobs, stats: cronStats } = useCronJobs();
-  const { jobs: systemCronJobs, stats: systemCronStats } = useSystemCron();
+  const { jobs: cronJobs, stats: cronStats, warning: cronWarning } = useCronJobs();
+  const { jobs: systemCronJobs, stats: systemCronStats, warning: sysCronWarning } = useSystemCron();
   const sysStats = useSysStats();
+  const { boxWidth, innerWidth } = useTerminalSize();
   const { exit } = useApp();
   const { write } = useStdout();
 
   // Clear screen when toggling to handle height changes
   useEffect(() => {
-    // ANSI escape: move to top-left and clear screen
     write('\x1b[H\x1b[2J');
   }, [showAll, write]);
+
+  // Clamp selection when agent list changes
+  useEffect(() => {
+    if (agents.length === 0) {
+      setSelectedIdx(0);
+      setExpandedIdx(null);
+    } else if (selectedIdx >= agents.length) {
+      setSelectedIdx(agents.length - 1);
+    }
+  }, [agents.length, selectedIdx]);
 
   // Handle keyboard input only when TTY is available
   useInput((input, key) => {
@@ -42,11 +55,19 @@ export function App() {
     if (input === 'a') {
       setShowAll(!showAll);
     }
+    // Arrow key navigation through agents
+    if (agents.length > 0) {
+      if (key.upArrow) {
+        setSelectedIdx(i => Math.max(0, i - 1));
+      }
+      if (key.downArrow) {
+        setSelectedIdx(i => Math.min(agents.length - 1, i + 1));
+      }
+      if (key.return) {
+        setExpandedIdx(prev => prev === selectedIdx ? null : selectedIdx);
+      }
+    }
   }, { isActive: isTTY });
-
-  const boxWidth = 78;
-  const innerWidth = boxWidth - 2; // 76 chars between borders
-  const horizontalLine = '─'.repeat(innerWidth);
 
   // Helper to pad content to fill the box
   const padLine = (text: string, extraPad: number = 0) => {
@@ -130,9 +151,14 @@ export function App() {
       {agents.length > 0 && (
         <Box flexDirection="column">
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
-          {agents.map((agent) => (
+          {agents.map((agent, idx) => (
             <Box key={agent.filePath} flexDirection="column">
-              <AgentCard agent={agent} boxWidth={innerWidth} />
+              <AgentCard
+                agent={agent}
+                boxWidth={innerWidth}
+                isSelected={idx === selectedIdx}
+                isExpanded={idx === expandedIdx}
+              />
               <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
             </Box>
           ))}
@@ -142,25 +168,43 @@ export function App() {
       <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
 
       {/* Cron Jobs section */}
-      {cronJobs.length > 0 && (
+      {(cronJobs.length > 0 || cronWarning) && (
         <Box flexDirection="column">
           <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
-          <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
+          {cronJobs.length > 0 && (
+            <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
+          )}
+          {cronWarning && (
+            <Text>
+              <Text dimColor>{'│  '}</Text>
+              <Text color="yellow">{'⚠ '}{cronWarning}</Text>
+              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - cronWarning.length)) + '│'}</Text>
+            </Text>
+          )}
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
 
       {/* System Cron section */}
-      {systemCronJobs.length > 0 && (
+      {(systemCronJobs.length > 0 || sysCronWarning) && (
         <Box flexDirection="column">
-          {cronJobs.length === 0 && (
+          {cronJobs.length === 0 && !cronWarning && (
             <>
               <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
               <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
             </>
           )}
-          <SystemCronSection jobs={systemCronJobs} stats={systemCronStats} boxWidth={innerWidth} />
+          {systemCronJobs.length > 0 && (
+            <SystemCronSection jobs={systemCronJobs} stats={systemCronStats} boxWidth={innerWidth} />
+          )}
+          {sysCronWarning && (
+            <Text>
+              <Text dimColor>{'│  '}</Text>
+              <Text color="yellow">{'⚠ '}{sysCronWarning}</Text>
+              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - sysCronWarning.length)) + '│'}</Text>
+            </Text>
+          )}
           <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
         </Box>
       )}
@@ -169,17 +213,22 @@ export function App() {
       <SysStatsSection stats={sysStats} boxWidth={innerWidth} />
 
       {/* Footer */}
-      <Footer stats={stats} codingAgentCount={codingStats.total} />
+      <Footer stats={stats} codingAgentCount={codingStats.total} boxWidth={boxWidth} />
 
       {/* Help hint */}
       <Box marginTop={1}>
         <Text>
           <Text dimColor>{'Press '}</Text>
           <Text color="cyan">{'q'}</Text>
-          <Text dimColor>{' to quit | '}</Text>
+          <Text dimColor>{' quit | '}</Text>
           <Text color="cyan">{'a'}</Text>
-          <Text dimColor>{' to toggle '}</Text>
-          <Text color={showAll ? 'green' : 'yellow'}>{showAll ? 'all' : 'running only'}</Text>
+          <Text dimColor>{' toggle '}</Text>
+          <Text color={showAll ? 'green' : 'yellow'}>{showAll ? 'all' : 'running'}</Text>
+          <Text dimColor>{' | '}</Text>
+          <Text color="cyan">{'↑↓'}</Text>
+          <Text dimColor>{' select | '}</Text>
+          <Text color="cyan">{'↵'}</Text>
+          <Text dimColor>{' expand'}</Text>
         </Text>
       </Box>
 

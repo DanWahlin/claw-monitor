@@ -6,10 +6,12 @@ import { SessionData, formatElapsed } from '../utils/parseSession.js';
 interface AgentCardProps {
   agent: SessionData;
   boxWidth: number;
+  isSelected?: boolean;
+  isExpanded?: boolean;
 }
 
-export function AgentCard({ agent, boxWidth }: AgentCardProps) {
-  const { label, status, elapsed, currentTool, toolArgs, toolCount } = agent;
+export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = false }: AgentCardProps) {
+  const { label, status, elapsed, currentTool, toolArgs, toolCount, recentTools, errorDetails } = agent;
 
   const getStatusIcon = () => {
     switch (status) {
@@ -74,10 +76,14 @@ export function AgentCard({ agent, boxWidth }: AgentCardProps) {
   const line2ContentWidth = 6 + detailText.length;
   const line2Padding = Math.max(1, boxWidth - line2ContentWidth);
 
+  // Selection indicator: ▸ when selected, space otherwise
+  const sel = isSelected ? '▸' : ' ';
+
   return (
     <Box flexDirection="column">
       <Text>
         <Text dimColor>{'│'}</Text>
+        <Text color={isSelected ? 'cyan' : undefined}>{sel}</Text>
         <Text color={getStatusColor()}>{getStatusIcon()}</Text>
         <Text> </Text>
         <Text bold color={getStatusColor()}>{displayLabel}</Text>
@@ -86,13 +92,73 @@ export function AgentCard({ agent, boxWidth }: AgentCardProps) {
         <Text color={getStatusColor()}>{statusText}</Text>
         <Text>{'  '}</Text>
         <Text dimColor>{elapsedStr}</Text>
-        <Text dimColor>{' '.repeat(line1Padding)}{'│'}</Text>
+        <Text dimColor>{' '.repeat(Math.max(1, line1Padding - 1))}{'│'}</Text>
       </Text>
       <Text>
         <Text dimColor>{'│   └─ '}</Text>
         <Text dimColor>{detailText}</Text>
         <Text dimColor>{' '.repeat(line2Padding)}{'│'}</Text>
       </Text>
+
+      {/* Expanded detail view */}
+      {isExpanded && (
+        <>
+          {/* Full label */}
+          {cleanLabel.length > maxLabelLen && (() => {
+            const fullText = `     ${cleanLabel}`;
+            const fPad = Math.max(0, boxWidth - fullText.length);
+            return (
+              <Text>
+                <Text dimColor>{'│'}</Text>
+                <Text dimColor>{fullText}</Text>
+                <Text dimColor>{' '.repeat(fPad) + '│'}</Text>
+              </Text>
+            );
+          })()}
+
+          {/* Recent tool calls */}
+          {recentTools.length > 0 && (
+            <>
+              {(() => {
+                const hdr = '     Recent tools:';
+                const hPad = Math.max(0, boxWidth - hdr.length);
+                return (
+                  <Text>
+                    <Text dimColor>{'│'}</Text>
+                    <Text color="cyan">{hdr}</Text>
+                    <Text dimColor>{' '.repeat(hPad) + '│'}</Text>
+                  </Text>
+                );
+              })()}
+              {recentTools.map((t, i) => {
+                const tLine = `       ${i + 1}. ${t}`;
+                const tPad = Math.max(0, boxWidth - tLine.length);
+                return (
+                  <Text key={i}>
+                    <Text dimColor>{'│'}</Text>
+                    <Text dimColor>{tLine}</Text>
+                    <Text dimColor>{' '.repeat(tPad) + '│'}</Text>
+                  </Text>
+                );
+              })}
+            </>
+          )}
+
+          {/* Error details */}
+          {errorDetails && (() => {
+            const errText = `     Error: ${errorDetails}`;
+            const truncErr = errText.length > boxWidth ? errText.substring(0, boxWidth - 1) + '~' : errText;
+            const ePad = Math.max(0, boxWidth - truncErr.length);
+            return (
+              <Text>
+                <Text dimColor>{'│'}</Text>
+                <Text color="red">{truncErr}</Text>
+                <Text dimColor>{' '.repeat(ePad) + '│'}</Text>
+              </Text>
+            );
+          })()}
+        </>
+      )}
     </Box>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { execSync } from 'child_process';
+import { POLL_CODING } from '../utils/config.js';
 
 export type AgentType = 'CC' | 'GHCP' | 'Codex';
 
@@ -124,7 +125,7 @@ export function useCodingAgents() {
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 5000);
+    const interval = setInterval(refresh, POLL_CODING);
     return () => clearInterval(interval);
   }, [refresh]);
 

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { execSync } from 'child_process';
 import { cronToHuman, relativeTime, nextCronRun } from '../utils/cronUtils.js';
+import { POLL_SYSCRON } from '../utils/config.js';
 
 export interface SystemCronJob {
   id: string;
@@ -90,22 +91,26 @@ function loadSystemCron(): { jobs: SystemCronJob[]; succeeded: boolean } {
 }
 
 export function useSystemCron() {
-  // Lazy init avoids an empty-state flash on first render
-  const [jobs, setJobs] = useState<SystemCronJob[]>(() => loadSystemCron().jobs);
+  const initial = loadSystemCron();
+  const [jobs, setJobs] = useState<SystemCronJob[]>(() => initial.jobs);
+  const [warning, setWarning] = useState<string | null>(() => initial.succeeded ? null : 'crontab -l failed');
 
   const refresh = useCallback(() => {
     const result = loadSystemCron();
-    // Keep previous data only when the command itself failed
-    if (!result.succeeded) return;
+    if (!result.succeeded) {
+      setWarning('crontab -l failed');
+      return;
+    }
+    setWarning(null);
     setJobs(result.jobs);
   }, []);
 
   useEffect(() => {
     // Crontab rarely changes — poll infrequently to minimise re-renders
-    const interval = setInterval(refresh, 60000);
+    const interval = setInterval(refresh, POLL_SYSCRON);
     return () => clearInterval(interval);
   }, [refresh]);
 
   const stats: SystemCronStats = { total: jobs.length };
-  return { jobs, stats };
+  return { jobs, stats, warning };
 }

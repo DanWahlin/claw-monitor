@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { SysStats } from '../hooks/useSysStats.js';
+import { WARN_THRESHOLD, CRIT_THRESHOLD, BAR_WIDTH } from '../utils/config.js';
 
 interface SysStatsProps {
   stats: SysStats;
@@ -8,8 +9,8 @@ interface SysStatsProps {
 }
 
 function barColor(percent: number): string {
-  if (percent >= 90) return 'red';
-  if (percent >= 70) return 'yellow';
+  if (percent >= CRIT_THRESHOLD) return 'red';
+  if (percent >= WARN_THRESHOLD) return 'yellow';
   return 'green';
 }
 
@@ -50,11 +51,21 @@ function renderBar(
 }
 
 export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
-  const barWidth = 20;
+  // Scale bar width with terminal: ~26% of inner width, clamped to [12, BAR_WIDTH]
+  const barWidth = Math.max(12, Math.min(BAR_WIDTH, Math.floor(boxWidth * 0.26)));
 
   const cpuDetail = `${stats.cpu.cores} cores`;
   const memDetail = `${stats.mem.usedGB} / ${stats.mem.totalGB} GB`;
   const diskDetail = `${stats.disk.usedGB} / ${stats.disk.totalGB} GB`;
+
+  const gpuDetail = stats.gpu
+    ? `${stats.gpu.memUsedMB} / ${stats.gpu.memTotalMB} MB`
+    : '';
+
+  const dockerText = stats.docker.available
+    ? `  🐳 ${stats.docker.running} container${stats.docker.running !== 1 ? 's' : ''} running`
+    : '';
+  const dockerPad = dockerText ? Math.max(0, boxWidth - dockerText.length) : 0;
 
   return (
     <Box flexDirection="column">
@@ -64,6 +75,44 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
       {renderBar('MEM ', stats.mem.percent, memDetail, barWidth, boxWidth)}
       <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {renderBar('DISK', stats.disk.percent, diskDetail, barWidth, boxWidth)}
+
+      {/* GPU bar (only when nvidia-smi is available) */}
+      {stats.gpu && (
+        <>
+          <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+          {renderBar('GPU ', stats.gpu.percent, gpuDetail, barWidth, boxWidth)}
+        </>
+      )}
+
+      {/* Docker container count */}
+      {stats.docker.available && stats.docker.running > 0 && (
+        <>
+          <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+          <Text>
+            <Text dimColor>{'│'}</Text>
+            <Text dimColor>{dockerText}</Text>
+            <Text dimColor>{' '.repeat(dockerPad) + '│'}</Text>
+          </Text>
+        </>
+      )}
+
+      {/* Warnings from failed stat commands */}
+      {stats.warnings.length > 0 && (
+        <>
+          <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+          {stats.warnings.map((w, i) => {
+            const warnText = `  ⚠ ${w}`;
+            const wPad = Math.max(0, boxWidth - warnText.length);
+            return (
+              <Text key={i}>
+                <Text dimColor>{'│'}</Text>
+                <Text color="yellow">{warnText}</Text>
+                <Text dimColor>{' '.repeat(wPad) + '│'}</Text>
+              </Text>
+            );
+          })}
+        </>
+      )}
     </Box>
   );
 }

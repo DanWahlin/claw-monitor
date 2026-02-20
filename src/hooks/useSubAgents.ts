@@ -1,13 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import chokidar from 'chokidar';
 import { parseSession, SessionData } from '../utils/parseSession.js';
+import { SESSIONS_DIR, SESSIONS_JSON, MAX_SESSIONS, POLL_AGENTS } from '../utils/config.js';
 
-const SESSIONS_DIR = path.join(os.homedir(), '.openclaw', 'agents', 'main', 'sessions');
-const SESSIONS_JSON = path.join(SESSIONS_DIR, 'sessions.json');
-const MAX_SESSIONS = 10;
 
 interface SessionMeta {
   sessionId: string;
@@ -158,7 +155,7 @@ export function useSubAgents(showAll: boolean = false) {
     }
 
     // Polling interval for status updates
-    const interval = setInterval(loadSessions, 500);
+    const interval = setInterval(loadSessions, POLL_AGENTS);
 
     return () => {
       clearInterval(interval);
