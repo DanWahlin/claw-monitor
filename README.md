@@ -1,6 +1,6 @@
 # 🦞 claw-monitor
 
-A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) agents, cron jobs, and system resources in real-time.
+A terminal dashboard for monitoring [OpenClaw](https://github.com/openclaw/openclaw) agents, cron jobs, Docker containers, and system resources in real-time.
 
 ![claw-monitor demo](https://img.shields.io/badge/status-beta-yellow)
 
@@ -11,26 +11,33 @@ A terminal UI for monitoring [OpenClaw](https://github.com/openclaw/openclaw) ag
 - **Session labels** — Shows spawn labels for easy identification
 - **Tool activity** — Displays the current tool being executed and total tool calls
 - **Elapsed time** — Track how long each session has been running
+- **Agent detail view** — Select agents with arrow keys and press Enter to expand (recent tools, errors, full label)
 - **Toggle modes** — Switch between "running only" and "all recent" views (`a` key)
 
 ### Coding Agent Detection
-- **Process monitoring** — Detects running Claude Code, GitHub Copilot CLI, and Codex processes
+- **Process monitoring** — Detects running Claude Code, Copilot CLI, and Codex processes
 - **Attach commands** — Jump into any coding agent's interactive tmux session
 - **PID and runtime** — See process IDs and cumulative CPU time
 
 ### Cron Job Dashboard
-- **All jobs at a glance** — Lists every cron job with name, schedule, next run, and last duration
+- **OpenClaw cron jobs** — Lists every job with name, schedule, model, next run, and last duration
+- **System cron jobs** — Shows root crontab entries with schedule, next run, and last run
 - **Human-readable schedules** — Translates cron expressions to readable format (`Mon 13:00`, `every 15m`, `Tue,Fri 06:00`)
 - **Relative next-run times** — Shows when each job fires next (`in 8m`, `in 4d`)
 - **Error tracking** — Highlights failing jobs with consecutive error counts
 - **Running indicator** — Shows which jobs are actively executing
 - **Sorted by next run** — Soonest jobs appear first
 
-### System Resource Gauges
-- **CPU usage** — Bar chart with percentage and core count
-- **Memory usage** — Bar chart with used/total GB
-- **Disk usage** — Bar chart with used/total GB
-- **Color-coded** — Green (healthy), yellow (70-90%), red (>90%)
+### System Resources & Docker
+- **CPU / Memory / Disk** — Color-coded bar charts with usage percentages and details
+- **GPU monitoring** — NVIDIA GPU usage via `nvidia-smi` (auto-detected)
+- **Docker containers** — Shows running container names, images, and status
+- **Two-column layout** — Resource gauges on the left, Docker info on the right
+- **Color thresholds** — Green (healthy), yellow (≥70%), red (≥90%) — configurable via env vars
+
+### Responsive Layout
+- **Auto-sizing** — Dashboard width adapts to your terminal (60–120 columns)
+- **Resize handling** — Responds to terminal resize events in real-time
 
 <img width="709" height="292" alt="No sub agents" src="images/no-sub-agents.png" />
 
@@ -66,11 +73,13 @@ claw-monitor
 |-----|--------|
 | `q` | Quit |
 | `a` | Toggle between running-only and all sessions |
+| `↑` `↓` | Select agent (when agents are running) |
+| `Enter` | Expand/collapse agent details |
 | `Ctrl+C` | Quit |
 
 ## Coding Agent Attach Commands
 
-claw-monitor detects running coding agents (Claude Code, GitHub Copilot CLI, Codex) via process monitoring. To jump into an agent's interactive terminal session, use the attach commands included in `bin/`:
+claw-monitor detects running coding agents (Claude Code, Copilot CLI, Codex) via process monitoring. To jump into an agent's interactive terminal session, use the attach commands included in `bin/`:
 
 ### Setup
 
@@ -83,15 +92,38 @@ sudo ln -sf "$(pwd)/bin/codex-attach" /usr/local/bin/codex-attach
 
 ### Commands
 
-| Command | Attaches to | Model |
-|---------|------------|-------|
-| `cc-attach` | Claude Code | Opus 4.6 |
-| `copilot-attach` | GitHub Copilot CLI | GPT-5 / Sonnet / Gemini |
-| `codex-attach` | Codex | GPT-5.2 |
+| Command | Attaches to |
+|---------|------------|
+| `cc-attach` | Claude Code |
+| `copilot-attach` | Copilot CLI |
+| `codex-attach` | Codex |
 
 Detach from any session with `Ctrl+B` then `D` — the agent keeps running in the background.
 
 > **Note:** These commands attach to tmux sessions named `cc`, `ghcp`, and `codex`. The sessions are created by your OpenClaw agent when it launches coding tasks. If no session is running, you'll see a message telling you to start one.
+
+## Configuration
+
+All settings can be overridden with environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENCLAW_DIR` | `~/.openclaw/agents/main/sessions` | Path to OpenClaw sessions directory |
+| `POLL_AGENTS` | `500` | Sub-agent poll interval (ms) |
+| `POLL_CODING` | `5000` | Coding agent poll interval (ms) |
+| `POLL_STATS` | `10000` | System stats poll interval (ms) |
+| `POLL_CRON` | `15000` | OpenClaw cron poll interval (ms) |
+| `POLL_SYSCRON` | `60000` | System cron poll interval (ms) |
+| `MAX_SESSIONS` | `10` | Maximum sessions to display |
+| `WARN_THRESHOLD` | `70` | Yellow threshold for resource bars (%) |
+| `CRIT_THRESHOLD` | `90` | Red threshold for resource bars (%) |
+| `BAR_WIDTH` | `20` | Width of resource bar charts |
+
+Example:
+
+```bash
+POLL_STATS=5000 WARN_THRESHOLD=60 claw-monitor
+```
 
 ## Requirements
 
@@ -99,32 +131,42 @@ Detach from any session with `Ctrl+B` then `D` — the agent keeps running in th
 - OpenClaw installed and running
 - tmux (for coding agent attach/detach)
 
+Optional (auto-detected):
+- `nvidia-smi` — for GPU monitoring
+- Docker — for container monitoring
+
 ## How It Works
 
 ### Sub-Agents
-Watches OpenClaw's session directory (`~/.openclaw/agents/main/sessions/`) and `sessions.json` metadata to identify sub-agent sessions, parse JSONL logs for tool usage, and track activity via `updatedAt` timestamps. Polls every 500ms.
+Watches OpenClaw's session directory (`~/.openclaw/agents/main/sessions/`) and `sessions.json` metadata to identify sub-agent sessions, parse JSONL logs for tool usage, and track activity via `updatedAt` timestamps.
 
 ### Coding Agents
-Polls `ps aux` every 5 seconds to detect running coding agent processes:
+Polls `ps aux` to detect running coding agent processes:
 
 | Agent | Process pattern | Icon |
 |-------|----------------|------|
 | Claude Code | `claude --dangerously` | 🤖 |
-| GitHub Copilot CLI | `gh copilot` | 🐙 |
+| Copilot CLI | `gh copilot` | 🐙 |
 | Codex | `codex` | 📦 |
 
 Filters out wrapper processes (sudo, bash, node shims) and deduplicates to one entry per agent type.
 
 ### Cron Jobs
-Runs `openclaw cron list --json` every 15 seconds. Parses schedules into human-readable format, calculates relative next-run times, and tracks consecutive errors.
+- **OpenClaw** — Runs `openclaw cron list --json` to fetch scheduled jobs
+- **System** — Parses `crontab -l` for root crontab entries
+
+Both parse cron expressions into human-readable schedules, calculate relative next-run times, and handle day-of-month / day-of-week OR logic per the cron spec.
 
 ### System Stats
-Uses `os.totalmem()`/`os.freemem()` for memory, `top` for CPU, and `df` for disk. Updates every 10 seconds.
+- **CPU** — Parsed from `top` output
+- **Memory** — `os.totalmem()` / `os.freemem()`
+- **Disk** — Parsed from `df -BG /`
+- **GPU** — Parsed from `nvidia-smi --query-gpu` (when available)
+- **Docker** — Parsed from `docker ps --format` (when available)
 
 ## Built With
 
-- [ink](https://github.com/vadimdemedes/ink) — React for CLI apps
-- [chokidar](https://github.com/paulmillr/chokidar) — File watching
+- [Ink](https://github.com/vadimdemedes/ink) — React for CLI apps
 - [tmux](https://github.com/tmux/tmux) — Terminal multiplexing for coding agent sessions
 
 ## License

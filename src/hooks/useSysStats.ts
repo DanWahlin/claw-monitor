@@ -11,8 +11,15 @@ export interface GpuInfo {
   name: string;
 }
 
+export interface DockerContainer {
+  name: string;
+  image: string;
+  status: string;
+}
+
 export interface DockerInfo {
   running: number;
+  containers: DockerContainer[];
   available: boolean;
 }
 
@@ -107,19 +114,23 @@ function getGpuStats(warnings: string[]): GpuInfo | null {
 
 function getDockerStats(warnings: string[]): DockerInfo {
   if (hasDocker === null) hasDocker = commandExists('docker');
-  if (!hasDocker) return { running: 0, available: false };
+  if (!hasDocker) return { running: 0, containers: [], available: false };
 
   try {
-    const output = execSync('docker ps -q 2>/dev/null', {
-      encoding: 'utf-8',
-      timeout: 3000,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    const ids = output.trim().split('\n').filter(l => l.length > 0);
-    return { running: ids.length, available: true };
+    const output = execSync(
+      'docker ps --format "{{.Names}}\\t{{.Image}}\\t{{.Status}}" 2>/dev/null',
+      { encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    const containers: DockerContainer[] = output.trim().split('\n')
+      .filter(l => l.length > 0)
+      .map(line => {
+        const [name, image, ...statusParts] = line.split('\t');
+        return { name: name || '?', image: image || '?', status: statusParts.join(' ') || '?' };
+      });
+    return { running: containers.length, containers, available: true };
   } catch {
     warnings.push('Docker stats unavailable');
-    return { running: 0, available: true };
+    return { running: 0, containers: [], available: true };
   }
 }
 

@@ -3,33 +3,27 @@ import React from 'react';
 import { render } from 'ink';
 import { App } from './App.js';
 
-// Intercept Ink's destructive clearTerminal (\x1b[2J\x1b[3J\x1b[H) that fires
-// when output height >= terminal rows.  Instead of blanking the whole screen,
-// overwrite each line in-place via absolute cursor positioning so the terminal
-// never scrolls and no flash occurs.
+// ── Flicker guard ────────────────────────────────────────────────────────
+// Ink's clearTerminal path (\x1b[2J\x1b[3J\x1b[H + content) fires on
+// EVERY React render when output exceeds terminal height — no same-output
+// guard.  We add one: skip the write entirely when the frame is identical
+// to the previous one.  When content DOES change the clearTerminal goes
+// through unmodified, which correctly handles scrollback.
+// ─────────────────────────────────────────────────────────────────────────
 const CLEAR_TERMINAL = '\x1b[2J\x1b[3J\x1b[H';
-const origWrite = process.stdout.write;
-const stdout = process.stdout;
-process.stdout.write = function (data: any, ...args: any[]) {
-  if (typeof data === 'string' && data.includes(CLEAR_TERMINAL)) {
-    const content = data.replace(CLEAR_TERMINAL, '');
-    const maxRows = stdout.rows || 24;
-    const lines = content.split('\n');
-    const limit = Math.min(lines.length, maxRows);
+const realWrite = process.stdout.write.bind(process.stdout);
+let prevFrame = '';
 
-    let buf = '';
-    for (let i = 0; i < limit; i++) {
-      // Move to row i+1 col 1, clear that line, write new content
-      buf += `\x1b[${i + 1};1H\x1b[2K${lines[i]}`;
-    }
-    // Clear any leftover old lines below the new content
-    if (limit < maxRows) {
-      buf += `\x1b[${limit + 1};1H\x1b[0J`;
-    }
-
-    return origWrite.apply(stdout, [buf, ...args] as any);
+process.stdout.write = function guardWrite(
+  data: string | Uint8Array,
+  ...args: any[]
+): boolean {
+  if (typeof data === 'string' && data.startsWith(CLEAR_TERMINAL)) {
+    const content = data.slice(CLEAR_TERMINAL.length);
+    if (content === prevFrame) return true;   // identical – skip
+    prevFrame = content;
   }
-  return origWrite.apply(stdout, [data, ...args] as any);
+  return realWrite(data, ...args);
 } as typeof process.stdout.write;
 
 // Clear screen on start

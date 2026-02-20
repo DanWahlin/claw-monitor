@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, useApp, useInput, useStdout } from 'ink';
+import { Box, Text, useApp, useInput } from 'ink';
 import { useSubAgents } from './hooks/useSubAgents.js';
 import { useCodingAgents } from './hooks/useCodingAgents.js';
 import { useCronJobs } from './hooks/useCronJobs.js';
@@ -27,12 +27,8 @@ export function App() {
   const sysStats = useSysStats();
   const { boxWidth, innerWidth } = useTerminalSize();
   const { exit } = useApp();
-  const { write } = useStdout();
 
-  // Clear screen when toggling to handle height changes
-  useEffect(() => {
-    write('\x1b[H\x1b[2J');
-  }, [showAll, write]);
+  // Ink re-renders automatically when state changes; no manual screen clear needed.
 
   // Clamp selection when agent list changes
   useEffect(() => {
@@ -147,6 +143,34 @@ export function App() {
         </Box>
       )}
 
+      {/* Attach commands (inside Sub-Agents section) */}
+      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+      {(() => {
+        const attachLine = 'cc-attach: Claude Code │ codex-attach: Codex │ copilot-attach: Copilot CLI';
+        const aPad = Math.max(0, innerWidth - attachLine.length - 2);
+        return (
+          <Text>
+            <Text dimColor>{'│  '}</Text>
+            <Text color="cyan">cc-attach</Text>
+            <Text dimColor>{': Claude Code │ '}</Text>
+            <Text color="cyan">codex-attach</Text>
+            <Text dimColor>{': Codex │ '}</Text>
+            <Text color="cyan">copilot-attach</Text>
+            <Text dimColor>{': Copilot CLI'}</Text>
+            <Text dimColor>{' '.repeat(aPad) + '│'}</Text>
+          </Text>
+        );
+      })()}
+      {(() => {
+        const detachText = '  Detach: Ctrl+B then D';
+        const dPad = Math.max(0, innerWidth - detachText.length);
+        return (
+          <Text>
+            <Text dimColor>{'│' + detachText + ' '.repeat(dPad) + '│'}</Text>
+          </Text>
+        );
+      })()}
+
       {/* Agent list */}
       {agents.length > 0 && (
         <Box flexDirection="column">
@@ -224,30 +248,16 @@ export function App() {
           <Text color="cyan">{'a'}</Text>
           <Text dimColor>{' toggle '}</Text>
           <Text color={showAll ? 'green' : 'yellow'}>{showAll ? 'all' : 'running'}</Text>
-          <Text dimColor>{' | '}</Text>
-          <Text color="cyan">{'↑↓'}</Text>
-          <Text dimColor>{' select | '}</Text>
-          <Text color="cyan">{'↵'}</Text>
-          <Text dimColor>{' expand'}</Text>
+          {agents.length > 0 && (
+            <>
+              <Text dimColor>{' | '}</Text>
+              <Text color="cyan">{'↑↓'}</Text>
+              <Text dimColor>{' select | '}</Text>
+              <Text color="cyan">{'↵'}</Text>
+              <Text dimColor>{' expand'}</Text>
+            </>
+          )}
         </Text>
-      </Box>
-
-      {/* Attach commands */}
-      <Box marginTop={1} flexDirection="column">
-        <Text dimColor>{'Attach to coding agents:'}</Text>
-        <Text>
-          <Text color="cyan">{'  cc-attach      '}</Text>
-          <Text dimColor>{'Claude Code (Opus 4.6)'}</Text>
-        </Text>
-        <Text>
-          <Text color="cyan">{'  copilot-attach  '}</Text>
-          <Text dimColor>{'GitHub Copilot (GPT-5 / Sonnet / Gemini)'}</Text>
-        </Text>
-        <Text>
-          <Text color="cyan">{'  codex-attach    '}</Text>
-          <Text dimColor>{'Codex (GPT-5.2)'}</Text>
-        </Text>
-        <Text dimColor>{'  Detach: Ctrl+B then D'}</Text>
       </Box>
     </Box>
   );

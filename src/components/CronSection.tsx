@@ -39,7 +39,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
   // Section header
   const errPart = stats.erroring > 0 ? ` · ${stats.erroring} failing` : '';
   const runPart = stats.running > 0 ? ` · ${stats.running} running` : '';
-  const titleText = `  Cron Jobs (${stats.total})${errPart}${runPart}`;
+  const titleText = `  OpenClaw Cron Jobs (${stats.total})${errPart}${runPart}`;
   const titlePad = Math.max(0, boxWidth - titleText.length);
 
   return (
@@ -47,7 +47,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
       {/* Section header */}
       <Text>
         <Text dimColor>{'│'}</Text>
-        <Text bold color="yellow">{'  Cron Jobs'}</Text>
+        <Text bold color="yellow">{'  OpenClaw Cron Jobs'}</Text>
         <Text dimColor>{' ('}</Text>
         <Text color="yellow" bold>{String(stats.total)}</Text>
         <Text dimColor>{')'}</Text>
