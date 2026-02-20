@@ -77,11 +77,15 @@ function detectAgents(): CodingAgent[] {
 
     for (const { type, pattern } of PATTERNS) {
       if (pattern.test(parsed.command)) {
-        // Truncate command for display
+        // Redact sensitive flags and truncate for display
+        const redacted = parsed.command.replace(
+          /(--(token|api-key|api_key|secret|password|apikey|auth)[= ]\s*)(\S+)/gi,
+          '$1***'
+        );
         const maxLen = 45;
-        const cmd = parsed.command.length > maxLen
-          ? parsed.command.substring(0, maxLen - 3) + '...'
-          : parsed.command;
+        const cmd = redacted.length > maxLen
+          ? redacted.substring(0, maxLen - 3) + '...'
+          : redacted;
 
         agents.push({
           type,

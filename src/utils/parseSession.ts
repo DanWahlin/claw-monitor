@@ -101,9 +101,13 @@ function extractToolCall(line: SessionLine): ToolCall | null {
   return null;
 }
 
+// Keys whose values should never be displayed
+const SENSITIVE_KEYS = /token|key|secret|password|auth|credential/i;
+
 function formatToolArgs(args: Record<string, unknown>): string {
   // Get first meaningful argument value
   for (const [key, value] of Object.entries(args)) {
+    if (SENSITIVE_KEYS.test(key)) continue; // skip sensitive fields
     if (typeof value === 'string' && value.length > 0) {
       // Take first line only
       const firstLine = value.split('\n')[0];
