@@ -32,6 +32,7 @@ export function SystemCronSection({ jobs, stats, boxWidth }: SystemCronSectionPr
         <Text dimColor>{')'}</Text>
         <Text dimColor>{' '.repeat(titlePad) + '│'}</Text>
       </Text>
+      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
 
       {/* Column headers */}
       <Text>

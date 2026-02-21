@@ -23,7 +23,6 @@
   "author": "Dan Wahlin",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.3.0",
     "chokidar": "^3.5.3",
     "ink": "^4.4.1",
     "ink-spinner": "^5.0.0",

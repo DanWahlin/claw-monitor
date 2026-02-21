@@ -57,7 +57,8 @@ function parsePsLine(line: string): { pid: number; elapsed: string; command: str
 function detectAgents(): CodingAgent[] {
   let output: string;
   try {
-    output = execSync('ps aux --no-headers', {
+    // macOS ps doesn't support --no-headers; use ps aux and skip the header line
+    output = execSync('ps aux', {
       encoding: 'utf-8',
       timeout: 3000,
       stdio: ['pipe', 'pipe', 'pipe'],

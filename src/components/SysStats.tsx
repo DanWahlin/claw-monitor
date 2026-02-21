@@ -96,8 +96,6 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
     ? `${stats.docker.running} container${stats.docker.running !== 1 ? 's' : ''}`
     : '';
 
-  const maxRows = Math.max(leftRows.length, hasDocker ? 1 + stats.docker.containers.length : 0);
-
   // Build display rows: interleave blank spacer lines between left-column bars,
   // while right-column rows flow continuously.
   type RowEntry = { leftIdx: number | null; rightIdx: number; isSpacer: boolean };
@@ -160,6 +158,7 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
 
   return (
     <Box flexDirection="column">
+      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
       {displayRows.map((row, i) => (
         <Text key={i}>
           <Text dimColor>{'│  '}</Text>

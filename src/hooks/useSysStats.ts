@@ -37,6 +37,7 @@ export interface SysStats {
 let hasNvidiaSmi: boolean | null = null;
 let hasDocker: boolean | null = null;
 let hasKubectl: boolean | null = null;
+const isMac = process.platform === 'darwin';
 
 function commandExists(cmd: string): boolean {
   try {
@@ -49,10 +50,19 @@ function commandExists(cmd: string): boolean {
 
 function getCpuPercent(warnings: string[]): number {
   try {
-    const output = execSync(
-      "top -bn1 | grep '%Cpu' | awk '{print 100 - $8}'",
-      { encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }
-    );
+    let output: string;
+    if (isMac) {
+      // macOS: top -l1 outputs "CPU usage: X% user, Y% sys, Z% idle"
+      output = execSync(
+        "top -l1 -n0 | grep 'CPU usage' | awk '{print 100 - $7}'",
+        { encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] }
+      );
+    } else {
+      output = execSync(
+        "top -bn1 | grep '%Cpu' | awk '{print 100 - $8}'",
+        { encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }
+      );
+    }
     const val = parseFloat(output.trim());
     return isNaN(val) ? 0 : Math.round(val);
   } catch {
@@ -73,7 +83,9 @@ function getMemStats(): { usedGB: number; totalGB: number; percent: number } {
 
 function getDiskStats(warnings: string[]): { usedGB: number; totalGB: number; percent: number; mount: string } {
   try {
-    const output = execSync("df -BG / | tail -1", {
+    // macOS df uses -g for GB blocks; Linux uses -BG
+    const cmd = isMac ? 'df -g / | tail -1' : 'df -BG / | tail -1';
+    const output = execSync(cmd, {
       encoding: 'utf-8',
       timeout: 3000,
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -82,7 +94,7 @@ function getDiskStats(warnings: string[]): { usedGB: number; totalGB: number; pe
     const totalGB = parseInt(parts[1]) || 0;
     const usedGB = parseInt(parts[2]) || 0;
     const percent = parseInt(parts[4]) || 0;
-    const mount = parts[5] || '/';
+    const mount = parts[isMac ? 8 : 5] || '/';
     return { usedGB, totalGB, percent, mount };
   } catch {
     warnings.push('Disk stats unavailable');
