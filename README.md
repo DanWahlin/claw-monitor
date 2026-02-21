@@ -2,7 +2,7 @@
 
 ![claw-monitor demo](https://img.shields.io/badge/status-beta-yellow)
 
-A terminal dashboard for monitoring [OpenClaw](https://github.com/openclaw/openclaw) agents, cron jobs, Docker containers, and system resources in real-time on Linux or MacOS.
+A terminal dashboard for monitoring [OpenClaw](https://github.com/openclaw/openclaw) agents, cron jobs, Docker containers, and system resources in real-time on Linux/WSL or MacOS.
 
 <img width="709" alt="Cron jobs and system stats" src="images/cron-jobs-and-stats.png" />
 
