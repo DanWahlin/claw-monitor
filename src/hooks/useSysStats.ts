@@ -185,27 +185,34 @@ function getK8sPods(warnings: string[]): DockerContainer[] {
 
   try {
     const output = execSync(
-      `${k8sKubectlPrefix} get pods --all-namespaces --no-headers ` +
-      "-o custom-columns='NS:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase,IMAGE:.spec.containers[0].image' 2>/dev/null",
+      `${k8sKubectlPrefix} get pods --all-namespaces --no-headers 2>/dev/null`,
       { encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] }
     );
     return output.trim().split('\n')
       .filter(l => l.length > 0)
       .map(line => {
-        const parts = line.trim().split(/\s{2,}/);
+        // Default kubectl output: NAMESPACE NAME READY STATUS RESTARTS AGE
+        const parts = line.trim().split(/\s+/);
         const ns = parts[0] || '';
         const name = parts[1] || '?';
-        const status = parts[2] || '?';
-        const image = parts[3] || '?';
-        return { ns, name, image, status };
+        const ready = parts[2] || '0/0';
+        const phase = parts[3] || '?';
+        return { ns, name, ready, phase };
       })
       .filter(p => !K8S_SYSTEM_NS.has(p.ns))
-      .map(p => ({
-        name: `${p.name} (${k8sLabel})`,
-        image: p.image,
-        status: p.status,
-        source: 'k8s' as const,
-      }));
+      .map(p => {
+        const [readyCount, totalCount] = p.ready.split('/').map(Number);
+        const isRunning = p.phase === 'Running';
+        const allReady = isRunning && !isNaN(readyCount) && !isNaN(totalCount) && totalCount > 0 && readyCount === totalCount;
+        const health = isRunning ? (allReady ? '(healthy)' : '(unhealthy)') : '';
+        const status = health ? `${p.phase} ${health}` : p.phase;
+        return {
+          name: `${p.name} (${k8sLabel})`,
+          image: '',
+          status,
+          source: 'k8s' as const,
+        };
+      });
   } catch {
     // kubectl not connected or cluster unreachable — silently skip
     return [];
