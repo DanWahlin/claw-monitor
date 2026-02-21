@@ -46,7 +46,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
     <Box flexDirection="column">
       {/* Section header */}
       <Text>
-        <Text dimColor>{'│'}</Text>
+        <Text dimColor>{' '}</Text>
         <Text bold color="yellow">{'  OpenClaw Cron Jobs'}</Text>
         <Text dimColor>{' ('}</Text>
         <Text color="yellow" bold>{String(stats.total)}</Text>
@@ -65,13 +65,13 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
             <Text color="yellow">{' running'}</Text>
           </>
         )}
-        <Text dimColor>{' '.repeat(titlePad) + '│'}</Text>
+        <Text dimColor>{' '.repeat(titlePad)}</Text>
       </Text>
-      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+      <Text>{' '}</Text>
 
       {/* Column headers */}
       <Text>
-        <Text dimColor>{'│' + headerText + ' '.repeat(headerPad) + '│'}</Text>
+        <Text dimColor>{' ' + headerText + ' '.repeat(headerPad)}</Text>
       </Text>
 
       {/* Job rows */}
@@ -87,7 +87,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
 
         return (
           <Text key={job.id}>
-            <Text dimColor>{'│'}</Text>
+            <Text dimColor>{' '}</Text>
             <Text>{' '}</Text>
             <Text bold color={color}>{ch}</Text>
             <Text>{' '}</Text>
@@ -103,7 +103,7 @@ export function CronSection({ jobs, stats, boxWidth }: CronSectionProps) {
             <Text dimColor>{fit(job.model, modelW)}</Text>
             <Text dimColor>{fit(job.nextRun, nextW)}</Text>
             <Text color={job.consecutiveErrors > 0 ? 'red' : 'gray'}>{fit(durText, durW)}</Text>
-            <Text dimColor>{' '.repeat(rowPad) + '│'}</Text>
+            <Text dimColor>{' '.repeat(rowPad)}</Text>
           </Text>
         );
       })}

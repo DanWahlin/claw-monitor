@@ -75,54 +75,54 @@ export function App() {
     <Box flexDirection="column" padding={0}>
       {/* Header */}
       <Text>
-        <Text dimColor>{'┌─ '}</Text>
+        <Text dimColor>{'── '}</Text>
         <Text color="red">🦞</Text>
         <Text bold> claw-monitor </Text>
-        <Text dimColor>{'─'.repeat(innerWidth - 18)}{'┐'}</Text>
+        <Text dimColor>{'─'.repeat(boxWidth - 19)}</Text>
       </Text>
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+      <Text>{' '}</Text>
 
       {/* Coding Agents section */}
       {codingAgents.length > 0 && (
         <Box flexDirection="column">
           <Text>
-            <Text dimColor>{'│  '}</Text>
+            <Text dimColor>{'   '}</Text>
             <Text bold color="magenta">Coding Agents</Text>
             <Text dimColor>{' ('}</Text>
             <Text color="magenta" bold>{String(codingStats.total)}</Text>
             <Text dimColor>{')'}</Text>
-            <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 14 - 2 - String(codingStats.total).length - 1)) + '│'}</Text>
+            <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 14 - 2 - String(codingStats.total).length - 1))}</Text>
           </Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text>{' '}</Text>
           {codingAgents.map((agent) => (
             <Box key={`${agent.type}-${agent.pid}`} flexDirection="column">
               <CodingAgentCard agent={agent} boxWidth={innerWidth} />
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+              <Text>{' '}</Text>
             </Box>
           ))}
-          <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text dimColor>{'─'.repeat(boxWidth)}</Text>
+          <Text>{' '}</Text>
         </Box>
       )}
 
       {/* Error state */}
       {error && (
         <Text>
-          <Text dimColor>{'│  '}</Text>
+          <Text dimColor>{'   '}</Text>
           <Text color="yellow">{'⚠  '}{error}</Text>
-          <Text dimColor>{padLine('  ⚠  ' + error) + '│'}</Text>
+          <Text dimColor>{padLine('  ⚠  ' + error)}</Text>
         </Text>
       )}
 
       {/* Sub-Agents section header */}
       {(agents.length > 0 || (!error && agents.length === 0)) && (
         <Text>
-          <Text dimColor>{'│  '}</Text>
+          <Text dimColor>{'   '}</Text>
           <Text bold color="cyan">Sub-Agents</Text>
           <Text dimColor>{' ('}</Text>
           <Text color="cyan" bold>{String(stats.total)}</Text>
           <Text dimColor>{')'}</Text>
-          <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 10 - 2 - String(stats.total).length - 1)) + '│'}</Text>
+          <Text dimColor>{' '.repeat(Math.max(1, innerWidth - 2 - 10 - 2 - String(stats.total).length - 1))}</Text>
         </Text>
       )}
 
@@ -130,34 +130,34 @@ export function App() {
       {!error && agents.length === 0 && (
         <Box flexDirection="column">
           <Text>
-            <Text dimColor>{'│  '}</Text>
+            <Text dimColor>{'   '}</Text>
             <Text color="green">No running sessions.</Text>
-            <Text dimColor>{padLine('  No running sessions.') + '│'}</Text>
+            <Text dimColor>{padLine('  No running sessions.')}</Text>
           </Text>
           <Text>
-            <Text dimColor>{'│  Press '}</Text>
+            <Text dimColor>{'   Press '}</Text>
             <Text color="cyan">a</Text>
             <Text dimColor>{' to show recent history.'}</Text>
-            <Text dimColor>{padLine('  Press a to show recent history.') + '│'}</Text>
+            <Text dimColor>{padLine('  Press a to show recent history.')}</Text>
           </Text>
         </Box>
       )}
 
       {/* Attach commands (inside Sub-Agents section) */}
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+      <Text>{' '}</Text>
       {(() => {
         const attachLine = 'cc-attach: Claude Code │ codex-attach: Codex │ copilot-attach: Copilot CLI';
         const aPad = Math.max(0, innerWidth - attachLine.length - 2);
         return (
           <Text>
-            <Text dimColor>{'│  '}</Text>
+            <Text dimColor>{'   '}</Text>
             <Text color="cyan">cc-attach</Text>
             <Text dimColor>{': Claude Code │ '}</Text>
             <Text color="cyan">codex-attach</Text>
             <Text dimColor>{': Codex │ '}</Text>
             <Text color="cyan">copilot-attach</Text>
             <Text dimColor>{': Copilot CLI'}</Text>
-            <Text dimColor>{' '.repeat(aPad) + '│'}</Text>
+            <Text dimColor>{' '.repeat(aPad)}</Text>
           </Text>
         );
       })()}
@@ -166,7 +166,7 @@ export function App() {
         const dPad = Math.max(0, innerWidth - detachText.length);
         return (
           <Text>
-            <Text dimColor>{'│' + detachText + ' '.repeat(dPad) + '│'}</Text>
+            <Text dimColor>{detachText + ' '.repeat(dPad)}</Text>
           </Text>
         );
       })()}
@@ -174,7 +174,7 @@ export function App() {
       {/* Agent list */}
       {agents.length > 0 && (
         <Box flexDirection="column">
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text>{' '}</Text>
           {agents.map((agent, idx) => (
             <Box key={agent.filePath} flexDirection="column">
               <AgentCard
@@ -183,30 +183,30 @@ export function App() {
                 isSelected={idx === selectedIdx}
                 isExpanded={idx === expandedIdx}
               />
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+              <Text>{' '}</Text>
             </Box>
           ))}
         </Box>
       )}
 
-      <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+      <Text>{' '}</Text>
 
       {/* Cron Jobs section */}
       {(cronJobs.length > 0 || cronWarning) && (
         <Box flexDirection="column">
-          <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text dimColor>{'─'.repeat(boxWidth)}</Text>
+          <Text>{' '}</Text>
           {cronJobs.length > 0 && (
             <CronSection jobs={cronJobs} stats={cronStats} boxWidth={innerWidth} />
           )}
           {cronWarning && (
             <Text>
-              <Text dimColor>{'│  '}</Text>
+              <Text dimColor>{'   '}</Text>
               <Text color="yellow">{'⚠ '}{cronWarning}</Text>
-              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - cronWarning.length)) + '│'}</Text>
+              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - cronWarning.length))}</Text>
             </Text>
           )}
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text>{' '}</Text>
         </Box>
       )}
 
@@ -215,8 +215,8 @@ export function App() {
         <Box flexDirection="column">
           {cronJobs.length === 0 && !cronWarning && (
             <>
-              <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
-              <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+              <Text dimColor>{'─'.repeat(boxWidth)}</Text>
+              <Text>{' '}</Text>
             </>
           )}
           {systemCronJobs.length > 0 && (
@@ -224,12 +224,12 @@ export function App() {
           )}
           {sysCronWarning && (
             <Text>
-              <Text dimColor>{'│  '}</Text>
+              <Text dimColor>{'   '}</Text>
               <Text color="yellow">{'⚠ '}{sysCronWarning}</Text>
-              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - sysCronWarning.length)) + '│'}</Text>
+              <Text dimColor>{' '.repeat(Math.max(0, innerWidth - 4 - sysCronWarning.length))}</Text>
             </Text>
           )}
-          <Text dimColor>{'│' + ' '.repeat(innerWidth) + '│'}</Text>
+          <Text>{' '}</Text>
         </Box>
       )}
 

@@ -13,19 +13,17 @@ interface FooterProps {
 }
 
 export function Footer({ stats, codingAgentCount = 0, boxWidth }: FooterProps) {
-  const innerWidth = boxWidth - 2;
-
   // Build stats string to calculate padding
   const agentWord = stats.total !== 1 ? 'agents' : 'agent';
   const codingSuffix = codingAgentCount > 0 ? ` │ ${codingAgentCount} coding` : '';
   const statsContent = `  ${stats.total} ${agentWord} │ ${stats.running} running │ ${stats.complete} complete │ ${stats.failed} failed${codingSuffix}`;
-  const padding = Math.max(0, innerWidth - statsContent.length);
+  const padding = Math.max(0, boxWidth - 2 - statsContent.length);
 
   return (
     <Box flexDirection="column">
-      <Text dimColor>{'├' + '─'.repeat(innerWidth) + '┤'}</Text>
+      <Text dimColor>{'─'.repeat(boxWidth)}</Text>
       <Text>
-        <Text dimColor>{'│  '}</Text>
+        <Text dimColor>{'   '}</Text>
         <Text bold>{stats.total}</Text>
         <Text dimColor>{' '}{agentWord}</Text>
         <Text dimColor>{' │ '}</Text>
@@ -44,9 +42,9 @@ export function Footer({ stats, codingAgentCount = 0, boxWidth }: FooterProps) {
             <Text dimColor>{' coding'}</Text>
           </>
         )}
-        <Text dimColor>{' '.repeat(padding) + '│'}</Text>
+        <Text dimColor>{' '.repeat(padding)}</Text>
       </Text>
-      <Text dimColor>{'└' + '─'.repeat(innerWidth) + '┘'}</Text>
+      <Text dimColor>{'─'.repeat(boxWidth)}</Text>
     </Box>
   );
 }

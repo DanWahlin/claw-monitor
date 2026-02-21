@@ -158,32 +158,31 @@ export function SysStatsSection({ stats, boxWidth }: SysStatsProps) {
 
   return (
     <Box flexDirection="column">
-      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+      <Text>{' '}</Text>
       {displayRows.map((row, i) => (
         <Text key={i}>
-          <Text dimColor>{'│  '}</Text>
+          <Text dimColor>{'   '}</Text>
           {row.leftIdx !== null
             ? barLine(leftRows[row.leftIdx].label, leftRows[row.leftIdx].percent, leftRows[row.leftIdx].detail, barW, leftW).chars
             : <Text>{' '.repeat(leftW)}</Text>
           }
           <Text dimColor>{' │ '}</Text>
           {renderRightCol(row.rightIdx)}
-          <Text dimColor>{'│'}</Text>
         </Text>
       ))}
 
       {/* Warnings from failed stat commands */}
       {stats.warnings.length > 0 && (
         <>
-          <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+          <Text>{' '}</Text>
           {stats.warnings.map((w, i) => {
             const warnText = `  ⚠ ${w}`;
             const wPad = Math.max(0, boxWidth - warnText.length);
             return (
               <Text key={i}>
-                <Text dimColor>{'│'}</Text>
+                <Text dimColor>{' '}</Text>
                 <Text color="yellow">{warnText}</Text>
-                <Text dimColor>{' '.repeat(wPad) + '│'}</Text>
+                <Text dimColor>{' '.repeat(wPad)}</Text>
               </Text>
             );
           })}

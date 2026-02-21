@@ -25,18 +25,18 @@ export function SystemCronSection({ jobs, stats, boxWidth }: SystemCronSectionPr
     <Box flexDirection="column">
       {/* Section header */}
       <Text>
-        <Text dimColor>{'│'}</Text>
+        <Text dimColor>{' '}</Text>
         <Text bold color="blue">{'  System Cron'}</Text>
         <Text dimColor>{' ('}</Text>
         <Text color="blue" bold>{String(stats.total)}</Text>
         <Text dimColor>{')'}</Text>
-        <Text dimColor>{' '.repeat(titlePad) + '│'}</Text>
+        <Text dimColor>{' '.repeat(titlePad)}</Text>
       </Text>
-      <Text dimColor>{'│' + ' '.repeat(boxWidth) + '│'}</Text>
+      <Text>{' '}</Text>
 
       {/* Column headers */}
       <Text>
-        <Text dimColor>{'│' + headerText + ' '.repeat(headerPad) + '│'}</Text>
+        <Text dimColor>{' ' + headerText + ' '.repeat(headerPad)}</Text>
       </Text>
 
       {/* Job rows */}
@@ -46,14 +46,14 @@ export function SystemCronSection({ jobs, stats, boxWidth }: SystemCronSectionPr
 
         return (
           <Text key={job.id}>
-            <Text dimColor>{'│'}</Text>
+            <Text dimColor>{' '}</Text>
             <Text dimColor>{' - '}</Text>
             <Text>{fit(job.name, nameW)}</Text>
             <Text>{' '}</Text>
             <Text dimColor>{fit(job.schedule, schedW)}</Text>
             <Text dimColor>{fit(job.nextRun, nextW)}</Text>
             <Text dimColor>{fit('—', lastW)}</Text>
-            <Text dimColor>{' '.repeat(rowPad) + '│'}</Text>
+            <Text dimColor>{' '.repeat(rowPad)}</Text>
           </Text>
         );
       })}

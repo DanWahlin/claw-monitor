@@ -42,7 +42,7 @@ export function CodingAgentCard({ agent, boxWidth }: CodingAgentCardProps) {
   return (
     <Box flexDirection="column">
       <Text>
-        <Text dimColor>{'│'}</Text>
+        <Text dimColor>{' '}</Text>
         <Text color="magenta">{icon}</Text>
         <Text> </Text>
         <Text bold color="magenta">{label}</Text>
@@ -52,12 +52,12 @@ export function CodingAgentCard({ agent, boxWidth }: CodingAgentCardProps) {
         <Text color="magenta">{pidStr}</Text>
         <Text>{'  '}</Text>
         <Text dimColor>{agent.elapsed}</Text>
-        <Text dimColor>{' '.repeat(line1Padding)}{'│'}</Text>
+        <Text dimColor>{' '.repeat(line1Padding)}</Text>
       </Text>
       <Text>
-        <Text dimColor>{'│   └─ '}</Text>
+        <Text dimColor>{'    └─ '}</Text>
         <Text dimColor>{agent.command}</Text>
-        <Text dimColor>{' '.repeat(line2Padding)}{'│'}</Text>
+        <Text dimColor>{' '.repeat(line2Padding)}</Text>
       </Text>
     </Box>
   );

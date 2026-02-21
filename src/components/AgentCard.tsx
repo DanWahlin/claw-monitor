@@ -82,7 +82,7 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
   return (
     <Box flexDirection="column">
       <Text>
-        <Text dimColor>{'│'}</Text>
+        <Text dimColor>{' '}</Text>
         <Text color={isSelected ? 'cyan' : undefined}>{sel}</Text>
         <Text color={getStatusColor()}>{getStatusIcon()}</Text>
         <Text> </Text>
@@ -92,12 +92,12 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
         <Text color={getStatusColor()}>{statusText}</Text>
         <Text>{'  '}</Text>
         <Text dimColor>{elapsedStr}</Text>
-        <Text dimColor>{' '.repeat(Math.max(1, line1Padding - 1))}{'│'}</Text>
+        <Text dimColor>{' '.repeat(Math.max(1, line1Padding - 1))}</Text>
       </Text>
       <Text>
-        <Text dimColor>{'│   └─ '}</Text>
+        <Text dimColor>{'    └─ '}</Text>
         <Text dimColor>{detailText}</Text>
-        <Text dimColor>{' '.repeat(line2Padding)}{'│'}</Text>
+        <Text dimColor>{' '.repeat(line2Padding)}</Text>
       </Text>
 
       {/* Expanded detail view */}
@@ -109,9 +109,9 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
             const fPad = Math.max(0, boxWidth - fullText.length);
             return (
               <Text>
-                <Text dimColor>{'│'}</Text>
+                <Text dimColor>{' '}</Text>
                 <Text dimColor>{fullText}</Text>
-                <Text dimColor>{' '.repeat(fPad) + '│'}</Text>
+                <Text dimColor>{' '.repeat(fPad)}</Text>
               </Text>
             );
           })()}
@@ -124,9 +124,9 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
                 const hPad = Math.max(0, boxWidth - hdr.length);
                 return (
                   <Text>
-                    <Text dimColor>{'│'}</Text>
+                    <Text dimColor>{' '}</Text>
                     <Text color="cyan">{hdr}</Text>
-                    <Text dimColor>{' '.repeat(hPad) + '│'}</Text>
+                    <Text dimColor>{' '.repeat(hPad)}</Text>
                   </Text>
                 );
               })()}
@@ -135,9 +135,9 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
                 const tPad = Math.max(0, boxWidth - tLine.length);
                 return (
                   <Text key={i}>
-                    <Text dimColor>{'│'}</Text>
+                    <Text dimColor>{' '}</Text>
                     <Text dimColor>{tLine}</Text>
-                    <Text dimColor>{' '.repeat(tPad) + '│'}</Text>
+                    <Text dimColor>{' '.repeat(tPad)}</Text>
                   </Text>
                 );
               })}
@@ -151,9 +151,9 @@ export function AgentCard({ agent, boxWidth, isSelected = false, isExpanded = fa
             const ePad = Math.max(0, boxWidth - truncErr.length);
             return (
               <Text>
-                <Text dimColor>{'│'}</Text>
+                <Text dimColor>{' '}</Text>
                 <Text color="red">{truncErr}</Text>
-                <Text dimColor>{' '.repeat(ePad) + '│'}</Text>
+                <Text dimColor>{' '.repeat(ePad)}</Text>
               </Text>
             );
           })()}
