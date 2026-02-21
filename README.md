@@ -62,7 +62,7 @@ npm run build
 ./bin/claw-monitor.js
 ```
 
-Or add to your PATH for global access (run from the project directory):
+Or add to your PATH for global access (run from the project root):
 
 ```bash
 npm link
