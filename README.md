@@ -78,12 +78,11 @@ claw-monitor
 
 | Key | Action |
 |-----|--------|
-| `q` | Quit |
+| `q` or `Ctrl+C` | Quit |
 | `a` | Toggle between running-only and all sessions |
 | `↑` `↓` | Select agent (when agents are running) |
 | `Enter` | Expand/collapse agent details |
 | `Cmd+-/+` or `Ctrl+-/+` | Zoom terminal font size |
-| `Ctrl+C` | Quit |
 
 ## Coding Agent Attach Commands
 
