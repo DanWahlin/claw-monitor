@@ -81,7 +81,7 @@ function detectAgents(): CodingAgent[] {
       if (pattern.test(parsed.command)) {
         // Redact sensitive flags and truncate for display
         const redacted = parsed.command.replace(
-          /(--(token|api-key|api_key|secret|password|apikey|auth)[= ]\s*)(\S+)/gi,
+          /(--(token|api[-_]key|secret|password|apikey|auth|key|bearer|access[-_]token|private[-_]key|credential)[= ]\s*)(\S+)/gi,
           '$1***'
         );
         const maxLen = 45;
